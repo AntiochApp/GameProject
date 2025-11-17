@@ -217,13 +217,16 @@
 
       if (text === "fail") {
         alert("로그인 실패! ID / PW를 다시 확인해주세요.");
-
         btn.classList.add("shake");
         setTimeout(() => btn.classList.remove("shake"), 500);
 
       } else {
         const data = JSON.parse(text);
         alert(`로그인 성공!\n이름: ${data.name}\n좋아하는 인물: ${data.bible}`);
+
+        /* 🔥 로그인 성공 후 game.html로 이동 */
+        localStorage.setItem("playerId", id);
+        window.location.href = "https://antiochapp.github.io/GameProject/game.html";
       }
 
     } catch (err) {
@@ -323,7 +326,6 @@
     const end = Date.now() + duration;
 
     (function frame() {
-      // 랜덤 위치와 컬러
       const colors = ["#ffcc00", "#ff6699", "#66ccff", "#99ff66", "#ff9966"];
       const confetti = document.createElement("div");
 
