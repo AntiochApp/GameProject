@@ -728,42 +728,45 @@
   const gachaCost = 50;
 
   const gachaTable = [
-    { text:"힘 +1",      apply:()=>{state.str+=1;},    weight:7 },
-    { text:"힘 +5",      apply:()=>{state.str+=5;},    weight:7 },
-    { text:"힘 +10",     apply:()=>{state.str+=10;},   weight:3 },
+  { text:"힘 +1",      apply:()=>{state.str+=1;},    weight:7 },
+  { text:"힘 +5",      apply:()=>{state.str+=5;},    weight:7 },
+  { text:"힘 +10",     apply:()=>{state.str+=10;},   weight:3 },
 
-    { text:"체력 +1",    apply:()=>{state.hp+=1;},     weight:7 },
-    { text:"체력 +5",    apply:()=>{state.hp+=5;},     weight:7 },
-    { text:"체력 +10",   apply:()=>{state.hp+=10;},    weight:3 },
+  { text:"체력 +1",    apply:()=>{state.hp+=1;},     weight:7 },
+  { text:"체력 +5",    apply:()=>{state.hp+=5;},     weight:7 },
+  { text:"체력 +10",   apply:()=>{state.hp+=10;},    weight:3 },
 
-    { text:"회피 +1",    apply:()=>{state.dex+=1;},    weight:7 },
-    { text:"회피 +5",    apply:()=>{state.dex+=5;},    weight:7 },
-    { text:"회피 +10",   apply:()=>{state.dex+=10;},   weight:3 },
+  { text:"회피 +1",    apply:()=>{state.dex+=1;},    weight:7 },
+  { text:"회피 +5",    apply:()=>{state.dex+=5;},    weight:7 },
+  { text:"회피 +10",   apply:()=>{state.dex+=10;},   weight:3 },
 
-    { text:"방어 +1",    apply:()=>{state.def+=1;},    weight:7 },
-    { text:"방어 +5",    apply:()=>{state.def+=5;},    weight:7 },
-    { text:"방어 +10",   apply:()=>{state.def+=10;},   weight:3 },
+  { text:"방어 +1",    apply:()=>{state.def+=1;},    weight:7 },
+  { text:"방어 +5",    apply:()=>{state.def+=5;},    weight:7 },
+  { text:"방어 +10",   apply:()=>{state.def+=10;},   weight:3 },
 
-    { text:"신앙심 +50", apply:()=>{state.faith+=50;}, weight:5 },
-    { text:"신앙심 +100",apply:()=>{state.faith+=100;},weight:1 },
+  { text:"신앙심 +50", apply:()=>{state.faith+=50;}, weight:5 },
+  { text:"신앙심 +100",apply:()=>{state.faith+=100;},weight:1 },
 
-    { text:"목숨 +1",    apply:()=>{state.life+=1;},   weight:2 },
-    { text:"목숨 +2",    apply:()=>{state.life+=2;},   weight:1 },
-    { text:"목숨 +3",    apply:()=>{state.life+=3;},   weight:1.82 },
+  { text:"목숨 +1",    apply:()=>{state.life+=1;},   weight:2 },
+  { text:"목숨 +2",    apply:()=>{state.life+=2;},   weight:1 },
+  { text:"목숨 +3",    apply:()=>{state.life+=3;},   weight:1.82 },
 
-    { text:"Starbucks Gift Card $5",  apply:()=>{}, weight:0.5 },
-    { text:"Starbucks Gift Card $10", apply:()=>{}, weight:0.05 },
-    { text:"Starbucks Gift Card $20", apply:()=>{}, weight:0.01 },
+  // ==== 여기부터 Gift Card 확률 크게 낮춘 버전 ====
+  { text:"Starbucks Gift Card $5",  apply:()=>{}, weight:0.1 },
+  { text:"Starbucks Gift Card $10", apply:()=>{}, weight:0.01 },
+  { text:"Starbucks Gift Card $20", apply:()=>{}, weight:0.002 },
 
-    { text:"Amazon Gift Card $10",    apply:()=>{}, weight:0.05 },
-    { text:"Amazon Gift Card $20",    apply:()=>{}, weight:0.01 },
+  { text:"Amazon Gift Card $10",    apply:()=>{}, weight:0.01 },
+  { text:"Amazon Gift Card $20",    apply:()=>{}, weight:0.002 },
 
-    { text:"Google Play Gift Card $5",  apply:()=>{}, weight:0.5 },
-    { text:"Google Play Gift Card $10", apply:()=>{}, weight:0.05 },
-    { text:"Google Play Gift Card $20", apply:()=>{}, weight:0.01 },
+  { text:"Google Play Gift Card $5",  apply:()=>{}, weight:0.1 },
+  { text:"Google Play Gift Card $10", apply:()=>{}, weight:0.01 },
+  { text:"Google Play Gift Card $20", apply:()=>{}, weight:0.002 },
 
-    { text:"꽝", apply:()=>{}, weight:20 }
-  ];
+  // 나머지 확률은 전부 '꽝' 으로 보정
+  { text:"꽝", apply:()=>{}, weight:20.944 }
+];
+
 
   function rollGacha() {
 
@@ -1051,6 +1054,7 @@
 
 </body>
 </html>
+
 
 
 
