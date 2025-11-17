@@ -90,7 +90,6 @@
     text-decoration: underline;
   }
 
-  /* 로딩 스피너 */
   .spinner {
     display: none;
     margin: 10px auto 0;
@@ -106,7 +105,7 @@
     100% { transform: rotate(360deg); }
   }
 
-  /* 로그인 실패 흔들기 애니메이션 */
+  /* 로그인 실패 흔들기 */
   @keyframes shake {
     0% { transform: translateX(0); }
     20% { transform: translateX(-5px); }
@@ -222,11 +221,21 @@
 
       } else {
         const data = JSON.parse(text);
+
+        // 저장할 saveData
+        const saveData = data.saveData || {
+          str: 1, hp: 10, dex: 1, def: 1, life: 1, faith: 0, storyIndex: 0
+        };
+
+        // 로컬 저장
+        localStorage.setItem("pilgrimPlayerId", id);
+        localStorage.setItem("pilgrimPlayerName", data.name);
+        localStorage.setItem("pilgrimSaveData", JSON.stringify(saveData));
+
         alert(`로그인 성공!\n이름: ${data.name}\n좋아하는 인물: ${data.bible}`);
 
-        /* 🔥 로그인 성공 후 game.html로 이동 */
-        localStorage.setItem("playerId", id);
-        window.location.href = "https://antiochapp.github.io/GameProject/game.html";
+        // game.html로 이동
+        window.location.href = "game.html";
       }
 
     } catch (err) {
@@ -238,7 +247,7 @@
     spinner.style.display = "none";
   }
 
-  /* 회원가입 (폭죽 포함) */
+  /* 회원가입 */
   async function signup() {
     const id = newId.value.trim();
     const password = newPw.value.trim();
@@ -266,7 +275,6 @@
         })
       });
 
-      /* 🎉 폭죽 애니메이션 실행 */
       confettiEffect();
 
       alert("회원가입 완료!");
@@ -296,10 +304,7 @@
     try {
       const res = await fetch(API_URL, {
         method: "POST",
-        body: JSON.stringify({
-          type: "findPw",
-          name, bible
-        })
+        body: JSON.stringify({ type: "findPw", name, bible })
       });
 
       const text = await res.text();
@@ -320,7 +325,7 @@
     spinner.style.display = "none";
   }
 
-  /* 🎆 폭죽 함수 */
+  /* 폭죽 */
   function confettiEffect() {
     const duration = 2000;
     const end = Date.now() + duration;
@@ -355,3 +360,4 @@
 
 </body>
 </html>
+
