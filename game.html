@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>Pilgrim’s Journey – Game</title>
+
+<style>
+  body {
+    margin: 0;
+    padding: 0;
+    font-family: "Georgia", serif;
+    background: url('bg_game.png') center/cover fixed;
+    color: #fff;
+  }
+
+  #topBar {
+    background: rgba(0,0,0,0.55);
+    padding: 12px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  #faithPoints {
+    font-size: 18px;
+    font-weight: bold;
+  }
+
+  #mainBox {
+    max-width: 800px;
+    margin: 40px auto;
+    background: rgba(0,0,0,0.55);
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+  }
+
+  #textKorean {
+    font-size: 20px;
+    margin-bottom: 20px;
+    line-height: 1.5;
+  }
+
+  #textEnglish {
+    font-size: 16px;
+    opacity: 0.85;
+    line-height: 1.5;
+  }
+
+  .choiceBtn {
+    display: block;
+    width: 100%;
+    margin: 12px 0;
+    padding: 14px;
+    font-size: 16px;
+    background: #8e5b32;
+    border: none;
+    border-radius: 8px;
+    color: #fff;
+    cursor: pointer;
+  }
+  .choiceBtn:hover {
+    background: #6e4526;
+  }
+
+  #saveBtn {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: #ffcc44;
+    padding: 14px 18px;
+    border-radius: 10px;
+    font-weight: bold;
+    cursor: pointer;
+    color: #000;
+  }
+</style>
+</head>
+
+<body>
+
+<!-- 상단바 -->
+<div id="topBar">
+  <div id="playerName">Player</div>
+  <div id="faithPoints">신앙 포인트: 0</div>
+</div>
+
+<!-- 메인 스토리 박스 -->
+<div id="mainBox">
+  <div id="textKorean">여기에 스토리 한국어가 표시됩니다.</div>
+  <div id="textEnglish">Here the English translation will appear.</div>
+
+  <button class="choiceBtn" onclick="nextEvent()">다음 진행</button>
+</div>
+
+<!-- 저장 버튼 -->
+<div id="saveBtn" onclick="saveGame()">💾 저장</div>
+
+<script>
+  // 로그인 페이지에서 넘겨받은 ID 저장
+  let playerId = localStorage.getItem("playerId") || "";
+  let faith = 0;
+  let stage = 1;
+
+  const API_URL = "👉 너의 웹앱 URL 넣기 👈";
+
+  // 게임 시작 시 불러오기
+  window.onload = () => {
+    if (!playerId) {
+      alert("로그인이 필요합니다!");
+      window.location.href = "index.html";
+      return;
+    }
+
+    document.getElementById("playerName").innerText = "Player: " + playerId;
+    loadGame();
+  };
+
+  // 서버에서 저장된 진행도 불러오기
+  async function loadGame() {
+    const res = await fetch(API_URL, {
+      method: "POST",
+      body: JSON.stringify({
+        type: "login",
+        id: playerId,
+        password: "loadOnly"
+      })
+    });
+
+    const text = await res.text();
+    const data = JSON.parse(text);
+
+    if (data.saveData) {
+      let saved = JSON.parse(data.saveData);
+      faith = saved.faith;
+      stage = saved.stage;
+    }
+
+    updateUI();
+    showEvent();
+  }
+
+  function updateUI() {
+    document.getElementById("faithPoints").innerText = "신앙 포인트: " + faith;
+  }
+
+  function showEvent() {
+    document.getElementById("textKorean").innerText =
+      "🚶‍♂️ 현재 스테이지: " + stage + "\n랜덤 이벤트가 여기에 표시됩니다.";
+    document.getElementById("textEnglish").innerText =
+      "🚶‍♂️ Current Stage: " + stage + "\nA random event will appear here.";
+  }
+
+  function nextEvent() {
+    faith += Math.floor(Math.random() * 3) + 1; // +1~3 포인트 증가
+    updateUI();
+    showEvent();
+  }
+
+  // 저장 버튼
+  async function saveGame() {
+    const data = {
+      faith,
+      stage
+    };
+
+    await fetch(API_URL, {
+      method: "POST",
+      body: JSON.stringify({
+        type: "save",
+        id: playerId,
+        saveData: JSON.stringify(data)
+      })
+    });
+
+    alert("저장 완료!");
+  }
+</script>
+
+</body>
+</html>
