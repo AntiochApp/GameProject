@@ -736,30 +736,33 @@ You heard that there is a community there that worships God.`,
   /* ---------------- HP / LIFE / 부활 / 게임오버 ---------------- */
 
   function applyDamage(dmg) {
-    state.hp -= dmg;
-    if (state.hp < 0) state.hp = 0;
+  state.hp -= dmg;
+  if (state.hp < 0) state.hp = 0;
 
-    if (state.hp <= 0) {
-      // LIFE 감소
-      state.life -= 1;
-      if (state.life < 0) {
-        // Game Over
-        handleGameOver();
-        return;
-      } else {
-        // 부활 : 현재 HP를 최대 HP로 회복, 랜덤 스토리로 이동
-        state.hp = state.maxHp;
-        setStoryLog("HP가 0이 되어 한 목숨을 잃었지만, 다시 일어났습니다! 다른 사건으로 이동합니다.");
-        renderHeader();
-        saveGame(true);
-        gotoRandomStoryInBranch(state.branch || 1);
-        return;
-      }
+  if (state.hp <= 0) {
+
+    // 1) LIFE 감소
+    state.life -= 1;
+
+    // 2) LIFE 검사 (0 이하 = Game Over)
+    if (state.life <= 0) {
+      handleGameOver();
+      return;
     }
 
+    // 3) LIFE가 아직 남아있으면 부활
+    state.hp = state.maxHp;
+    setStoryLog("HP가 0이 되어 한 목숨을 잃었지만, 다시 일어났습니다! 다른 사건으로 이동합니다.");
     renderHeader();
     saveGame(true);
+
+    gotoRandomStoryInBranch(state.branch || 1);
+    return;
   }
+
+  renderHeader();
+  saveGame(true);
+}
 
   function handleGameOver() {
     const keptFaith = state.faith; // 신앙심만 유지
@@ -1189,3 +1192,4 @@ Win 3 times to win the battle. Lose 3 times and you are defeated.`,
 
 </body>
 </html>
+
