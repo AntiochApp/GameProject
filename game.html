@@ -315,7 +315,7 @@
       <div class="shop-grid" id="shopGrid"></div>
 
       <div class="gacha-section">
-        <div class="gacha-desc">랜덤 뽑기 (100F) – 큰 보상 또는 꽝!</div>
+        <div class="gacha-desc">랜덤 뽑기 (50F) – 큰 보상 또는 꽝!</div>
         <button class="gacha-btn" onclick="rollGacha()">✨ 랜덤 뽑기 ✨</button>
       </div>
     </div>
@@ -490,7 +490,7 @@
   }
 
   /* 랜덤뽑기 */
-  const gachaCost = 100;
+  const gachaCost = 50;
 
   const gachaTable = [
     { text:"힘 +1",      apply:()=>{state.str+=1;},    weight:7 },
@@ -642,3 +642,4 @@
 
 </body>
 </html>
+
