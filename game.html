@@ -3,6 +3,10 @@
 <head>
   <meta charset="UTF-8" />
   <title>Pilgrim's Journey – Game</title>
+
+  <!-- 외부 스토리(JSON) 파서 (Option C용, 나중에 storyEngine.js 만들면 됨) -->
+  <script src="storyEngine.js"></script>
+
   <style>
     body {
       margin: 0;
@@ -29,7 +33,7 @@
       padding: 8px 16px;
       border-radius: 8px;
       box-shadow: 0 3px 10px rgba(0,0,0,0.4);
-      margin-bottom: 24px;
+      margin-bottom: 10px;
     }
 
     .player-info {
@@ -63,6 +67,9 @@
       background: #8e5b32;
       box-shadow: 0 2px 5px rgba(0,0,0,0.35);
     }
+    .btn-top.chat {
+      background: #5c6bc0;
+    }
     .btn-top.save {
       background: #407a3b;
     }
@@ -70,18 +77,59 @@
       filter: brightness(1.05);
     }
 
-    /* 스토리 카드 */
+    /* 미니 채팅 바 (최근 2개 메시지) */
+    .chat-mini-wrapper {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 8px;
+    }
+    .chat-mini {
+      width: min(900px, 90vw);
+      background: rgba(30, 30, 30, 0.85);
+      border-radius: 14px;
+      padding: 6px 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.6);
+      border: 1px solid rgba(255,255,255,0.07);
+      font-size: 12px;
+      color: #f5f2e9;
+      font-family: "Georgia", system-ui, sans-serif;
+    }
+    .chat-mini-line {
+      display: flex;
+      gap: 6px;
+      align-items: baseline;
+      line-height: 1.3;
+      opacity: 0.95;
+    }
+    .chat-mini-name {
+      color: #ffe082;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+    .chat-mini-text {
+      color: #fefefe;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .chat-mini-empty {
+      color: #999;
+      font-style: italic;
+      text-align: center;
+    }
+
+    /* 스토리 카드 래퍼 */
     .story-wrapper {
       display: flex;
       justify-content: center;
-      margin-top: 32px;
+      margin-top: 10px;
     }
 
     .story-card {
       width: min(900px, 90vw);
       background: rgba(255,255,245,0.94);
       border-radius: 18px;
-      padding: 22px 28px 26px;
+      padding: 24px 30px 26px;
       box-shadow: 0 8px 24px rgba(0,0,0,0.45);
       border: 1px solid rgba(220,200,160,0.9);
       position: relative;
@@ -108,12 +156,14 @@
       font-weight: 700;
       margin-bottom: 10px;
       color: #3a2a16;
+      white-space: pre-line;
     }
 
     .story-en {
       font-size: 14px;
       color: #665544;
-      margin-bottom: 16px;
+      margin-bottom: 18px;
+      white-space: pre-line;
     }
 
     /* 선택지 (RPG 스타일) */
@@ -147,7 +197,7 @@
       box-shadow: 0 2px 6px rgba(0,0,0,0.18);
     }
 
-    /* 스토리 로그 (한 줄) */
+    /* 스토리/전투 로그 (한 줄) */
     .story-log {
       margin-top: 14px;
       padding: 6px 10px;
@@ -162,7 +212,7 @@
       text-overflow: ellipsis;
     }
 
-    /* 상점 모달 */
+    /* 공통 모달 배경 */
     .modal-backdrop {
       position: fixed;
       inset: 0;
@@ -173,6 +223,7 @@
       z-index: 10;
     }
 
+    /* 상점 모달 */
     .modal {
       background: #f8f4ec;
       border-radius: 18px;
@@ -188,7 +239,7 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 8px;
+      margin-bottom: 12px;
     }
 
     .modal-header h2 {
@@ -215,8 +266,8 @@
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
       gap: 10px;
-      margin-bottom: 18px;
-      margin-top: 8px;
+      margin-bottom: 16px;
+      margin-top: 6px;
     }
 
     .shop-item {
@@ -261,12 +312,12 @@
     .gacha-section {
       border-top: 1px dashed #c7b08a;
       padding-top: 10px;
-      margin-top: 14px;
+      margin-top: 6px;
       text-align: center;
     }
 
     .gacha-btn {
-      margin-top: 8px;
+      margin-top: 6px;
       padding: 10px 24px;
       border-radius: 999px;
       border: none;
@@ -286,20 +337,147 @@
       color: #7a5b34;
     }
 
-    /* 가챠 로그 */
     .gacha-log-box {
-      margin-top: 10px;
-      margin-bottom: 12px;
+      margin-top: 15px;
       background:#fff7e0;
       padding:10px;
       border-radius:10px;
       border:1px solid #d8c6a4;
-      max-height:80px;
+      max-height:140px;
       overflow-y:auto;
       font-size:13px;
     }
 
-    /* 간단한 토스트 */
+    /* 채팅 모달 */
+    .chat-modal {
+      background: radial-gradient(circle at top, #f9f0dc 0%, #e6d4b2 40%, #d0b58a 100%);
+      border-radius: 20px;
+      padding: 20px 22px 18px;
+      width: min(640px, 95vw);
+      box-shadow: 0 12px 32px rgba(0,0,0,0.7);
+      border: 2px solid #8d6e3c;
+      max-height: 90vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .chat-modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+    .chat-modal-header h2 {
+      margin: 0;
+      font-size: 20px;
+      color: #4a2c12;
+      letter-spacing: 1px;
+    }
+
+    .chat-modal-body {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      flex: 1;
+      min-height: 260px;
+    }
+
+    .chat-messages {
+      flex: 1;
+      background: rgba(255,255,255,0.65);
+      border-radius: 12px;
+      padding: 10px;
+      border: 1px solid rgba(139,87,42,0.35);
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      font-size: 13px;
+    }
+
+    .chat-row {
+      display: flex;
+      flex-direction: column;
+      max-width: 80%;
+    }
+    .chat-row.me {
+      align-self: flex-end;
+      text-align: right;
+    }
+    .chat-row.other {
+      align-self: flex-start;
+      text-align: left;
+    }
+
+    .chat-name {
+      font-size: 11px;
+      color: #6d4c41;
+      margin-bottom: 2px;
+      opacity: 0.9;
+    }
+
+    .chat-bubble {
+      padding: 6px 10px;
+      border-radius: 12px;
+      line-height: 1.3;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+      word-break: break-word;
+    }
+
+    .chat-row.me .chat-bubble {
+      background: #8e5b32;
+      color: #fff;
+      border-bottom-right-radius: 4px;
+    }
+    .chat-row.other .chat-bubble {
+      background: rgba(255,255,255,0.95);
+      color: #3e2723;
+      border-bottom-left-radius: 4px;
+    }
+
+    .chat-input-row {
+      display: flex;
+      gap: 8px;
+      margin-top: 4px;
+    }
+
+    .chat-input-row input {
+      flex: 1;
+      border-radius: 999px;
+      border: 1px solid #b19063;
+      padding: 8px 12px;
+      font-size: 13px;
+      outline: none;
+      background: rgba(255,255,255,0.9);
+    }
+    .chat-input-row input:focus {
+      border-color: #8e5b32;
+      box-shadow: 0 0 0 2px rgba(142,91,50,0.2);
+    }
+
+    .chat-send-btn {
+      border-radius: 999px;
+      border: none;
+      padding: 8px 16px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      background: #8e5b32;
+      color: #fff;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.35);
+    }
+    .chat-send-btn:hover {
+      filter: brightness(1.05);
+    }
+
+    .chat-empty {
+      font-size: 12px;
+      color: #8d6e63;
+      text-align: center;
+      margin-top: 12px;
+    }
+
+    /* 토스트 */
     .toast {
       position: fixed;
       left: 50%;
@@ -331,8 +509,16 @@
       <span class="stats" id="statLine"></span>
     </div>
     <div class="top-buttons">
+      <button class="btn-top chat" onclick="openChat()">채팅</button>
       <button class="btn-top" onclick="openShop()">상점</button>
       <button class="btn-top save" onclick="saveGame()">저장</button>
+    </div>
+  </div>
+
+  <!-- 미니 채팅 바 (최근 2개) -->
+  <div class="chat-mini-wrapper">
+    <div class="chat-mini" id="chatMini">
+      <div class="chat-mini-empty">채팅이 아직 없습니다. 친구들에게 먼저 말을 걸어보세요!</div>
     </div>
   </div>
 
@@ -376,28 +562,45 @@
     </div>
   </div>
 
+  <!-- 채팅 모달 -->
+  <div class="modal-backdrop" id="chatBackdrop">
+    <div class="chat-modal">
+      <div class="chat-modal-header">
+        <h2>Prayer Chat</h2>
+        <button class="modal-close" onclick="closeChat()">×</button>
+      </div>
+      <div class="chat-modal-body">
+        <div class="chat-messages" id="chatMessages"></div>
+        <div class="chat-input-row">
+          <input id="chatInput" type="text" maxlength="100"
+                 placeholder="메시지를 입력하고 Enter를 눌러보세요. (최대 100자)">
+          <button class="chat-send-btn" onclick="sendChat()">보내기</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <div class="toast" id="toast"></div>
 
 </div>
 
 <script>
-  /* ---------------- 기본 설정 ---------------- */
-
   const API_URL = "https://script.google.com/macros/s/AKfycbwUqF_7np5AgJTygWKEn8diNyiFmvAnHaSsY0Xz3zVMuw5bGnn6y2Wr35zmq-w_ZuHyTQ/exec";
 
   let playerId = localStorage.getItem("pilgrimPlayerId") || "";
   let playerName = localStorage.getItem("pilgrimPlayerName") || "로그인";
 
+  /* ---- 기본 능력치/상태 ---- */
   const defaultState = {
     str: 1,
-    hp: 10,        // 현재 HP
-    maxHp: 10,     // 최대 HP
+    hp: 10,
+    maxHp: 10,
     dex: 1,
     def: 1,
     life: 1,
     faith: 0,
-    storyKey: "0-0", // 현재 스토리 ID
-    branch: 0        // 0,1,2 ...
+    storyKey: "0-0",
+    branch: 0        // 0: 시작, 1: 소돔에 남음, 2: 소돔을 떠남
   };
 
   let state = { ...defaultState };
@@ -407,60 +610,34 @@
     if (saved) {
       state = Object.assign({}, defaultState, saved);
     }
-  } catch (e) {}
+  } catch(e){}
 
   if (!state.maxHp) state.maxHp = state.hp || 10;
   if (!state.storyKey) state.storyKey = "0-0";
   if (state.life == null) state.life = 1;
 
-  /* 랜덤뽑기 로그 (게임 중 유지, 새 로그인 시 초기화) */
+  /* 랜덤뽑기 로그 */
   let randomLog = [];
 
-  /* 전투 상태 */
+  /* 채팅 데이터 */
+  let chatMessages = [];
+  let chatPollTimer = null;
+
+  /* 전투 상태 (가위바위보 - 순수 운) */
   let battleState = {
     active: false,
     wins: 0,
     losses: 0
   };
 
-  /* ---------------- 확률 계산 함수들 ---------------- */
+  /* storyEngine.js에서 채워줄 수 있는 외부 스토리 공간 (Option C) */
+  window.externalScenes = window.externalScenes || {};
 
-  function getAttackWinChance() {
-    const base = 0.4;       // 40%
-    const perStr = 0.0001;  // STR +1당 0.01%
-    let chance = base + perStr * state.str;
-    return Math.min(chance, 0.8); // 최대 80%
-  }
+  /* ---------------- 스토리 데이터 (내장) ---------------- */
 
-  function getDefenseChance() {
-    const perDef = 0.0001; // DEF +1당 0.01%
-    let chance = perDef * state.def;
-    return Math.min(chance, 0.8); // 최대 80%
-  }
-
-  function getRunChanceInBattle() {
-    const base = 0.10;     // 10%
-    const perDex = 0.0001; // DEX +1당 0.01%
-    let chance = base + perDex * state.dex;
-    return Math.min(chance, 0.7); // 최대 70%
-  }
-
-  function getRunChanceEncounter() {
-    const base = 0.5;      // 50%
-    const perDex = 0.0001; // DEX +1당 0.01%
-    let chance = base + perDex * state.dex;
-    return Math.min(chance, 0.9); // 최대 90% (임의 설정)
-  }
-
-  function chance(p) {
-    return Math.random() < p;
-  }
-
-  /* ---------------- 스토리 데이터 ---------------- */
-
-  // branch: 1 = 1번 길(소돔에 남는다), 2 = 떠난 길
+  // branch: 1 = 소돔에 남는다, 2 = 소돔을 떠난 길
   const scenes = {
-    // 0-0 : 게임 시작 메인 스토리
+    /* 0-0 : 게임 시작 */
     "0-0": {
       id: "0-0",
       branch: 0,
@@ -495,7 +672,7 @@ Will you stay in Sodom, or will you leave?`,
       ]
     },
 
-    // 1-1 : 랜덤 스토리의 첫 사건 (소돔에 남겼을 때)
+    /* 1-1 : 소돔에 남았을 때, 유혹 이벤트 (전투 없음) */
     "1-1": {
       id: "1-1",
       branch: 1,
@@ -514,23 +691,14 @@ What will you do, {player}?`,
         {
           text: "1. 함께한다 (Go with them)",
           action: () => {
-            // HP -10
             const dmg = 10;
             setStoryLog("유혹에 따라갔습니다... 영적, 육적으로 지쳐 HP가 10 감소합니다.");
             applyDamage(dmg);
-            // 이후 1번 브랜치 랜덤 스토리로
             gotoRandomStoryInBranch(1);
           }
         },
         {
-          text: "2. 싸운다 (Fight)",
-          action: () => {
-            setStoryLog("싸우기로 결심했습니다. 가위바위보 전투가 시작됩니다.");
-            startBattle();
-          }
-        },
-        {
-          text: "3. 도망간다 (Run away)",
+          text: "2. 도망간다 (Run away)",
           action: () => {
             attemptEncounterEscape();
           }
@@ -538,7 +706,7 @@ What will you do, {player}?`,
       ]
     },
 
-    // 2-1 : 소돔을 떠난 사람을 위한 첫 스토리 (간단 버전)
+    /* 2-1 : 소돔을 떠난 사람, 광야 첫 장면 (여기서 전투 필수 발생) */
     "2-1": {
       id: "2-1",
       branch: 2,
@@ -547,34 +715,40 @@ What will you do, {player}?`,
 뒤를 돌아보면 여전히 불빛과 소음이 가득한 도시가 보입니다.
 그러나 마음 한편에는 이상한 평안이 찾아옵니다.
 
-이제 어디로 가야 할까요?`,
+그때, 멀리서 어두운 그림자가 다가옵니다.
+죄의 도시에서 쫓겨난 악한 영이, 당신의 발걸음을 막으려 합니다.
+
+이제 어떻게 하시겠습니까?`,
       en: `You leave Sodom and begin walking through the wilderness.
 Behind you, the city is still full of noise and lights,
 but deep in your heart, a strange peace begins to grow.
 
-Where will you go now?`,
+Then, from a distance, a dark shadow approaches.
+An evil spirit driven out from the city tries to block your path.
+
+What will you do now?`,
       choices: [
         {
-          text: "1. 하나님께 기도하며 길을 묻는다 (Pray and ask God for direction)",
+          text: "1. 하나님께 기도하고 맞선다 (Pray and stand firm)",
           action: () => {
             state.faith += 5;
-            setStoryLog("하나님께 기도했습니다. 신앙심 +5");
+            setStoryLog("하나님께 기도했습니다. 신앙심 +5, 전투가 시작됩니다.");
             renderHeader();
             saveGame(true);
-            gotoRandomStoryInBranch(2);
+            startBattle();
           }
         },
         {
-          text: "2. 그냥 앞에 보이는 길로 간다 (Just follow the road)",
+          text: "2. 두렵지만 싸운다 (Fight even in fear)",
           action: () => {
-            setStoryLog("아무 계획 없이 길을 따라 걷습니다...");
-            gotoRandomStoryInBranch(2);
+            setStoryLog("두려움 속에서도 싸우기로 결심했습니다. 전투가 시작됩니다.");
+            startBattle();
           }
         }
       ]
     },
 
-    // ---- 브랜치 1 랜덤 스토리 예시들 ----
+    /* ---- 브랜치 1 랜덤 스토리 예시들 ---- */
     "1-R1": {
       id: "1-R1",
       branch: 1,
@@ -626,7 +800,7 @@ The atmosphere gets wilder, and they even begin to mock God.`,
       ]
     },
 
-    // ---- 브랜치 2 랜덤 스토리 예시들 ----
+    /* ---- 브랜치 2 랜덤 스토리 예시들 ---- */
     "2-R1": {
       id: "2-R1",
       branch: 2,
@@ -678,6 +852,11 @@ You heard that there is a community there that worships God.`,
       .replace(/\{surname\}/g, playerName);
   }
 
+  function getScene(id) {
+    // 내부 scenes 우선, 없으면 외부 JSON에서 로드된 externalScenes 사용
+    return scenes[id] || window.externalScenes[id];
+  }
+
   function renderScene(scene) {
     document.getElementById("storyKo").textContent = replaceName(scene.ko);
     document.getElementById("storyEn").textContent = replaceName(scene.en);
@@ -703,9 +882,9 @@ You heard that there is a community there that worships God.`,
   }
 
   function gotoScene(id) {
-    const scene = scenes[id];
+    const scene = getScene(id);
     if (!scene) {
-      setStoryLog("아직 준비되지 않은 스토리입니다.");
+      setStoryLog("아직 준비되지 않은 스토리입니다. (id: " + id + ")");
       return;
     }
     state.storyKey = id;
@@ -715,11 +894,15 @@ You heard that there is a community there that worships God.`,
   }
 
   function gotoRandomStoryInBranch(branch) {
-    const pool = Object.values(scenes).filter(
+    const internalPool = Object.values(scenes).filter(
       (s) => s.branch === branch && s.random
     );
+    const externalPool = Object.values(window.externalScenes || {}).filter(
+      (s) => s.branch === branch && s.random
+    );
+    const pool = internalPool.concat(externalPool);
+
     if (!pool.length) {
-      // 랜덤 스토리가 아직 없으면, 해당 브랜치의 첫 메인스토리로 복귀
       const fallback = branch === 1 ? "1-1" : "2-1";
       gotoScene(fallback);
       return;
@@ -736,36 +919,31 @@ You heard that there is a community there that worships God.`,
   /* ---------------- HP / LIFE / 부활 / 게임오버 ---------------- */
 
   function applyDamage(dmg) {
-  state.hp -= dmg;
-  if (state.hp < 0) state.hp = 0;
+    state.hp -= dmg;
+    if (state.hp < 0) state.hp = 0;
 
-  if (state.hp <= 0) {
+    if (state.hp <= 0) {
+      state.life -= 1;
 
-    // 1) LIFE 감소
-    state.life -= 1;
+      if (state.life <= 0) {
+        handleGameOver();
+        return;
+      }
 
-    // 2) LIFE 검사 (0 이하 = Game Over)
-    if (state.life <= 0) {
-      handleGameOver();
+      state.hp = state.maxHp;
+      setStoryLog("HP가 0이 되어 한 목숨을 잃었지만, 다시 일어났습니다! 다른 사건으로 이동합니다.");
+      renderHeader();
+      saveGame(true);
+      gotoRandomStoryInBranch(state.branch || 1);
       return;
     }
 
-    // 3) LIFE가 아직 남아있으면 부활
-    state.hp = state.maxHp;
-    setStoryLog("HP가 0이 되어 한 목숨을 잃었지만, 다시 일어났습니다! 다른 사건으로 이동합니다.");
     renderHeader();
     saveGame(true);
-
-    gotoRandomStoryInBranch(state.branch || 1);
-    return;
   }
 
-  renderHeader();
-  saveGame(true);
-}
-
   function handleGameOver() {
-    const keptFaith = state.faith; // 신앙심만 유지
+    const keptFaith = state.faith;
     setStoryLog("Game Over... 능력치는 초기화되고, 신앙심만 유지됩니다.");
 
     state = {
@@ -778,7 +956,7 @@ You heard that there is a community there that worships God.`,
     gotoScene("0-0");
   }
 
-  /* ---------------- 전투 시스템 (가위바위보) ---------------- */
+  /* ---------------- 전투 시스템 (가위바위보, 순수 운) ---------------- */
 
   function startBattle() {
     battleState = {
@@ -793,10 +971,14 @@ You heard that there is a community there that worships God.`,
       random: false,
       ko: `전투 모드가 시작되었습니다!
 가위, 바위, 보 중 하나를 선택하세요.
-3번 이기면 승리, 3번 지면 패배입니다.`,
+3번 이기면 승리, 3번 지면 패배입니다.
+
+(능력치와 상관없이, 완전히 '운'으로만 승패가 결정됩니다.)`,
       en: `Battle mode has begun!
 Choose rock, paper, or scissors.
-Win 3 times to win the battle. Lose 3 times and you are defeated.`,
+Win 3 times to win the battle. Lose 3 times and you are defeated.
+
+The result is pure luck, not based on your stats.`,
       choices: [
         { text: "✌ 가위 (Scissors)", action: () => battleRound() },
         { text: "✊ 바위 (Rock)",     action: () => battleRound() },
@@ -806,35 +988,45 @@ Win 3 times to win the battle. Lose 3 times and you are defeated.`,
     };
 
     renderScene(battleScene);
-    setStoryLog("가위바위보에서 3번 이기면 승리합니다.");
+    setStoryLog("가위바위보에서 3번 이기면 승리합니다. (완전 랜덤)");
   }
 
   function battleRound() {
     if (!battleState.active) return;
 
-    const winProb = getAttackWinChance();
-    if (chance(winProb)) {
+    const r = Math.random();   // 0~1
+    if (r < 1/3) {
+      // 승리
       battleState.wins++;
       setStoryLog(`전투에서 승리했습니다! (현재 승리: ${battleState.wins}/3)`);
 
       if (battleState.wins >= 3) {
         battleWin();
       }
-    } else {
+    } else if (r < 2/3) {
+      // 패배
       battleState.losses++;
       setStoryLog(`전투에서 패배했습니다... (현재 패배: ${battleState.losses}/3)`);
 
       if (battleState.losses >= 3) {
         battleLose();
       }
+    } else {
+      // 비김
+      setStoryLog("비겼습니다! 다시 선택하세요.");
     }
+  }
+
+  function getRunChanceInBattle() {
+    // 전투 중 도망 확률 (적당히 40%)
+    return 0.4;
   }
 
   function battleRun() {
     if (!battleState.active) return;
     const runProb = getRunChanceInBattle();
 
-    if (chance(runProb)) {
+    if (Math.random() < runProb) {
       battleState.active = false;
       setStoryLog("전투에서 도망에 성공했습니다!");
       saveGame(true);
@@ -861,15 +1053,6 @@ Win 3 times to win the battle. Lose 3 times and you are defeated.`,
 
   function battleLose() {
     battleState.active = false;
-    const defProb = getDefenseChance();
-
-    if (chance(defProb)) {
-      setStoryLog("전투에서는 졌지만, 방어에 성공하여 HP가 감소하지 않았습니다!");
-      renderHeader();
-      saveGame(true);
-      gotoRandomStoryInBranch(state.branch || 1);
-      return;
-    }
 
     setStoryLog("전투에서 패배하여 HP가 6 감소했습니다.");
     applyDamage(6);
@@ -878,17 +1061,21 @@ Win 3 times to win the battle. Lose 3 times and you are defeated.`,
 
   /* ---------------- 1-1에서의 '도망간다' 선택 ---------------- */
 
+  function getRunChanceEncounter() {
+    // 일반 상황에서의 도망 확률 (50%)
+    return 0.5;
+  }
+
   function attemptEncounterEscape() {
     const runProb = getRunChanceEncounter();
 
-    if (chance(runProb)) {
+    if (Math.random() < runProb) {
       setStoryLog("도망에 성공했습니다! 다른 사건으로 이동합니다.");
       saveGame(true);
       gotoRandomStoryInBranch(state.branch || 1);
     } else {
       setStoryLog("도망에 실패했습니다... HP가 1 감소합니다.");
       applyDamage(1);
-      // 다시 1-1 상황으로 돌아간다
       gotoScene("1-1");
     }
   }
@@ -954,7 +1141,6 @@ Win 3 times to win the battle. Lose 3 times and you are defeated.`,
     state.faith -= item.cost;
 
     if (item.stat === "hp") {
-      // 체력 업그레이드: 최대 HP와 현재 HP 모두 상승
       state.maxHp += item.amount;
       state.hp += item.amount;
       if (state.hp > state.maxHp) state.hp = state.maxHp;
@@ -1030,13 +1216,11 @@ Win 3 times to win the battle. Lose 3 times and you are defeated.`,
       r -= entry.weight;
     }
 
-    // 로그 추가 (최근 순)
     const time = new Date().toLocaleTimeString("ko-KR", {hour:"2-digit", minute:"2-digit"});
     randomLog.unshift(`${time} → ${chosen.text}`);
     if (randomLog.length > 20) randomLog.pop();
     updateRandomLogUI();
 
-    // Gift Card면 팝업
     if (chosen.text.includes("Gift Card")) {
       showGiftPopup(chosen.text);
       renderHeader();
@@ -1045,7 +1229,6 @@ Win 3 times to win the battle. Lose 3 times and you are defeated.`,
       return;
     }
 
-    // 일반 보상
     chosen.apply();
     renderHeader();
     updateShopFaithText();
@@ -1061,12 +1244,10 @@ Win 3 times to win the battle. Lose 3 times and you are defeated.`,
       box.innerHTML = "<p style='margin:0;color:#999;'>아직 기록이 없습니다.</p>";
       return;
     }
-    box.innerHTML = randomLog
-      .map(item=>`<div>• ${item}</div>`)
-      .join("");
+    box.innerHTML = randomLog.map(item => `<div>• ${item}</div>`).join("");
   }
 
-  /* Gift Card 당첨 팝업 + 스크린샷 안내 */
+  /* Gift Card 당첨 팝업 */
   function showGiftPopup(itemName){
     confettiEffect();
 
@@ -1093,30 +1274,16 @@ Win 3 times to win the battle. Lose 3 times and you are defeated.`,
       <p style="font-size:15px; margin-bottom:6px;">
         📸 스크린샷을 찍어서 이재관 목사님께 카톡으로 보내주세요!
       </p>
-      <p style="font-size:13px; color:#666; margin-bottom:10px;">
+      <p style="font-size:13px; color:#666;">
         📸 Please take a screenshot and send it to Pastor Jaegwan via KakaoTalk!
       </p>
-      <button id="fakeShotBtn"
-        style="margin-top:4px; background:#f0f0f0; color:#333;
-               padding:8px 16px; border-radius:8px; border:1px solid #ccc; cursor:pointer;">
-        (예시) 스크린샷 버튼
-      </button>
-      <br/>
-      <button style="margin-top:16px; background:#444; color:white;
+      <button style="margin-top:20px; background:#444; color:white;
                      padding:10px 20px; border-radius:8px; border:none; cursor:pointer;">
         닫기 Close
       </button>
     `;
 
-    card.querySelector("button:last-of-type").onclick = () => back.remove();
-
-    // 실제로 화면 캡쳐는 브라우저에서 자동으로 못하지만,
-    // 이 버튼은 "스크린샷을 직접 찍어주세요!" 안내용.
-    const fakeBtn = card.querySelector("#fakeShotBtn");
-    fakeBtn.onclick = () => {
-      alert("기기에서 스크린샷을 직접 찍어주세요! (예: 휴대폰 캡쳐 버튼)");
-    };
-
+    card.querySelector("button").onclick = () => back.remove();
     back.appendChild(card);
     document.body.appendChild(back);
   }
@@ -1147,6 +1314,136 @@ Win 3 times to win the battle. Lose 3 times and you are defeated.`,
     } catch(e){
       if(!silent) alert("저장 중 오류가 발생했습니다.");
     }
+  }
+
+  /* ---------------- 채팅 기능 ---------------- */
+
+  function openChat() {
+    document.getElementById("chatBackdrop").style.display = "flex";
+    fetchChat(true);
+    setTimeout(() => {
+      const input = document.getElementById("chatInput");
+      if (input) input.focus();
+    }, 100);
+  }
+
+  function closeChat() {
+    document.getElementById("chatBackdrop").style.display = "none";
+  }
+
+  async function fetchChat(silent = true) {
+    try {
+      const res = await fetch(API_URL, {
+        method: "POST",
+        body: JSON.stringify({ type: "chatList" })
+      });
+      const text = await res.text();
+      let list = [];
+      try {
+        list = JSON.parse(text);
+      } catch (e) {
+        list = [];
+      }
+      chatMessages = Array.isArray(list) ? list : [];
+      renderChatMini();
+      renderChatModalMessages();
+    } catch (err) {
+      if (!silent) console.error(err);
+    }
+  }
+
+  function renderChatMini() {
+    const box = document.getElementById("chatMini");
+    if (!chatMessages.length) {
+      box.innerHTML = "<div class='chat-mini-empty'>채팅이 아직 없습니다. 친구들에게 먼저 말을 걸어보세요!</div>";
+      return;
+    }
+
+    const lastTwo = chatMessages.slice(-2);
+    box.innerHTML = lastTwo.map(msg => {
+      const name = escapeHtml(msg.name || "누군가");
+      const text = escapeHtml(msg.message || "");
+      return `
+        <div class="chat-mini-line">
+          <span class="chat-mini-name">${name} :</span>
+          <span class="chat-mini-text">${text}</span>
+        </div>
+      `;
+    }).join("");
+  }
+
+  function renderChatModalMessages() {
+    const wrap = document.getElementById("chatMessages");
+    if (!chatMessages.length) {
+      wrap.innerHTML = `<div class="chat-empty">아직 채팅이 없습니다. 첫 번째 메시지를 남겨보세요!</div>`;
+      return;
+    }
+
+    wrap.innerHTML = chatMessages.map(msg => {
+      const isMe = (msg.name === playerName);
+      const cls = isMe ? "me" : "other";
+      const name = escapeHtml(msg.name || "Player");
+      const text = escapeHtml(msg.message || "");
+      return `
+        <div class="chat-row ${cls}">
+          <div class="chat-name">${name}</div>
+          <div class="chat-bubble">${text}</div>
+        </div>
+      `;
+    }).join("");
+
+    wrap.scrollTop = wrap.scrollHeight;
+  }
+
+  async function sendChat() {
+    const input = document.getElementById("chatInput");
+    if (!input) return;
+    const msg = (input.value || "").trim();
+    if (!msg) return;
+    if (!playerId) {
+      alert("로그인 정보가 없습니다. 다시 로그인 해주세요.");
+      return;
+    }
+
+    input.value = "";
+    try {
+      const res = await fetch(API_URL, {
+        method: "POST",
+        body: JSON.stringify({
+          type: "chatSend",
+          id: playerId,
+          name: playerName,
+          message: msg
+        })
+      });
+      const text = await res.text();
+      if (text !== "ok") {
+        showToast("채팅 전송 실패: " + text);
+      }
+    } catch (e) {
+      showToast("채팅 전송 오류");
+    }
+
+    fetchChat(true);
+  }
+
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      const chatInput = document.getElementById("chatInput");
+      if (document.activeElement === chatInput) {
+        e.preventDefault();
+        sendChat();
+      }
+    }
+  });
+
+  function escapeHtml(str) {
+    return String(str)
+      .replace(/&/g,"&amp;")
+      .replace(/</g,"&lt;")
+      .replace(/>/g,"&gt;")
+      .replace(/"/g,"&quot;")
+      .replace(/'/g,"&#039;");
   }
 
   /* ---------------- 토스트 & 폭죽 ---------------- */
@@ -1188,8 +1485,9 @@ Win 3 times to win the battle. Lose 3 times and you are defeated.`,
 
   renderHeader();
   gotoScene(state.storyKey || "0-0");
+  fetchChat(true);
+  chatPollTimer = setInterval(fetchChat, 5000); // 5초마다 채팅 갱신
 </script>
 
 </body>
 </html>
-
