@@ -1,95 +1,124 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8" />
-  <title>Pilgrim’s Journey – Login</title>
+<meta charset="UTF-8" />
+<title>Pilgrim’s Journey – Login</title>
 
-  <style>
-    body {
-      margin: 0;
-      padding: 0;
-      font-family: "Georgia", serif;
-      background: url('bg_pilgrim.png') center/cover no-repeat fixed;
-    }
+<style>
+  body {
+    margin: 0;
+    padding: 0;
+    font-family: "Georgia", serif;
+    background: url('bg_pilgrim.png') center/cover no-repeat fixed;
+  }
 
-    .overlay {
-      width: 100%;
-      min-height: 100vh;
-      background: rgba(0,0,0,0.45);
-      padding: 40px 20px;
-      box-sizing: border-box;
-    }
+  .overlay {
+    width: 100%;
+    min-height: 100vh;
+    background: rgba(0,0,0,0.45);
+    padding: 40px 20px;
+    box-sizing: border-box;
+  }
 
-    .banner {
-      width: 100%;
-      max-width: 460px;
-      margin: 0 auto 20px;
-      height: 160px;
-      background: url('pilgrim_banner.png') center/contain no-repeat;
-    }
+  .banner {
+    width: 100%;
+    max-width: 460px;
+    margin: 0 auto 20px;
+    height: 160px;
+    background: url('pilgrim_banner.png') center/contain no-repeat;
+  }
 
-    .card {
-      max-width: 380px;
-      margin: 20px auto;
-      background: rgba(255, 248, 230, 0.95);
-      padding: 30px;
-      border-radius: 14px;
-      box-shadow: 0 6px 20px rgba(0,0,0,0.35);
-      border: 2px solid #d3b58f;
-      backdrop-filter: blur(2px);
-    }
+  .card {
+    max-width: 380px;
+    margin: 20px auto;
+    background: rgba(255, 248, 230, 0.95);
+    padding: 30px;
+    border-radius: 14px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.35);
+    border: 2px solid #d3b58f;
+  }
 
-    h2 {
-      text-align: center;
-      color: #5d4024;
-      margin-top: 0;
-      font-weight: bold;
-    }
+  h2 {
+    text-align: center;
+    color: #5d4024;
+    margin-top: 0;
+    font-weight: bold;
+  }
 
-    .logo {
-      width: 90px;
-      display: block;
-      margin: 0 auto 10px;
-    }
+  .logo {
+    width: 90px;
+    display: block;
+    margin: 0 auto 10px;
+  }
 
-    input {
-      width: 100%;
-      padding: 12px;
-      border: 1px solid #c9a775;
-      border-radius: 8px;
-      margin-bottom: 16px;
-      background: #fffaf2;
-    }
+  input {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #c9a775;
+    border-radius: 8px;
+    margin-bottom: 16px;
+    background: #fffaf2;
+  }
 
-    button {
-      width: 100%;
-      padding: 12px;
-      background: #8e5b32;
-      color: white;
-      font-size: 15px;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      margin-top: 6px;
-    }
-    button:hover {
-      background: #6f4526;
-    }
+  button {
+    width: 100%;
+    padding: 12px;
+    background: #8e5b32;
+    color: white;
+    font-size: 15px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    margin-top: 6px;
+  }
 
-    .link-row {
-      text-align: center;
-      margin-top: 10px;
-      font-size: 13px;
-    }
+  button:hover {
+    background: #6f4526;
+  }
 
-    .link-btn {
-      font-size: 13px;
-      color: #5d4024;
-      cursor: pointer;
-      margin: 0 6px;
-      text-decoration: underline;
-    }
-  </style>
+  .link-row {
+    text-align: center;
+    margin-top: 10px;
+    font-size: 13px;
+  }
+
+  .link-btn {
+    font-size: 13px;
+    color: #5d4024;
+    cursor: pointer;
+    margin: 0 6px;
+    text-decoration: underline;
+  }
+
+  /* 로딩 스피너 */
+  .spinner {
+    display: none;
+    margin: 10px auto 0;
+    border: 4px solid #d3b58f;
+    border-top: 4px solid #8e5b32;
+    border-radius: 50%;
+    width: 28px;
+    height: 28px;
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+
+  /* 로그인 실패 흔들기 애니메이션 */
+  @keyframes shake {
+    0% { transform: translateX(0); }
+    20% { transform: translateX(-5px); }
+    40% { transform: translateX(5px); }
+    60% { transform: translateX(-5px); }
+    80% { transform: translateX(5px); }
+    100% { transform: translateX(0); }
+  }
+  .shake {
+    animation: shake 0.4s ease-in-out;
+  }
+</style>
 </head>
 
 <body>
@@ -99,13 +128,14 @@
 
   <!-- LOGIN -->
   <div class="card" id="loginBox">
-    <img src="pilgrim_icon.png" class="logo" alt="icon">
+    <img src="pilgrim_icon.png" class="logo">
     <h2>ANTIOCH GAME</h2>
 
     <input type="text" id="loginId" placeholder="ID">
     <input type="password" id="loginPw" placeholder="PASSWORD">
 
-    <button onclick="login()">로그인하기</button>
+    <button onclick="login()" id="loginBtn">로그인하기</button>
+    <div id="loginSpinner" class="spinner"></div>
 
     <div class="link-row">
       <span class="link-btn" onclick="showFindPw()">비밀번호 찾기</span> |
@@ -113,14 +143,17 @@
     </div>
   </div>
 
-  <!-- SIGN UP -->
+  <!-- SIGNUP -->
   <div class="card" id="signupBox" style="display:none;">
     <h2>회원가입 / Sign Up</h2>
     <input type="text" id="newId" placeholder="ID">
     <input type="password" id="newPw" placeholder="NEW PASSWORD">
     <input type="text" id="newName" placeholder="NAME">
     <input type="text" id="newFav" placeholder="My Favorite Bible Character">
-    <button onclick="signup()">가입하기</button>
+
+    <button onclick="signup()" id="signupBtn">가입하기</button>
+    <div id="signupSpinner" class="spinner"></div>
+
     <div class="link-row">
       <span class="link-btn" onclick="showLogin()">로그인으로 돌아가기</span>
     </div>
@@ -131,7 +164,10 @@
     <h2>비밀번호 찾기 / Find Password</h2>
     <input type="text" id="findName" placeholder="REAL NAME">
     <input type="text" id="findFav" placeholder="My Favorite Bible Character">
-    <button onclick="findPw()">비밀번호 찾기</button>
+
+    <button onclick="findPw()" id="findPwBtn">비밀번호 찾기</button>
+    <div id="findPwSpinner" class="spinner"></div>
+
     <div class="link-row">
       <span class="link-btn" onclick="showLogin()">로그인으로 돌아가기</span>
     </div>
@@ -140,103 +176,180 @@
 </div>
 
 <script>
-  // ★ 여기를 너의 웹앱 URL로 바꿔줘 ★
   const API_URL = "https://script.google.com/macros/s/AKfycbwUqF_7np5AgJTygWKEn8diNyiFmvAnHaSsY0Xz3zVMuw5bGnn6y2Wr35zmq-w_ZuHyTQ/exec";
 
-  // 화면 전환
+  /* 화면 전환 */
   function showSignup() {
-    document.getElementById("loginBox").style.display = "none";
-    document.getElementById("signupBox").style.display = "block";
-    document.getElementById("findPwBox").style.display = "none";
+    loginBox.style.display = "none";
+    signupBox.style.display = "block";
+    findPwBox.style.display = "none";
   }
-
   function showFindPw() {
-    document.getElementById("loginBox").style.display = "none";
-    document.getElementById("signupBox").style.display = "none";
-    document.getElementById("findPwBox").style.display = "block";
+    loginBox.style.display = "none";
+    signupBox.style.display = "none";
+    findPwBox.style.display = "block";
   }
-
   function showLogin() {
-    document.getElementById("loginBox").style.display = "block";
-    document.getElementById("signupBox").style.display = "none";
-    document.getElementById("findPwBox").style.display = "none";
+    loginBox.style.display = "block";
+    signupBox.style.display = "none";
+    findPwBox.style.display = "none";
   }
 
-  // 회원가입
+  /* 로그인 */
+  async function login() {
+    const id = loginId.value.trim();
+    const password = loginPw.value.trim();
+
+    const btn = loginBtn;
+    const spinner = loginSpinner;
+
+    btn.disabled = true;
+    btn.innerText = "로그인 중...";
+    spinner.style.display = "block";
+
+    try {
+      const res = await fetch(API_URL, {
+        method: "POST",
+        body: JSON.stringify({ type: "login", id, password })
+      });
+
+      const text = await res.text();
+
+      if (text === "fail") {
+        alert("로그인 실패! ID / PW를 다시 확인해주세요.");
+
+        btn.classList.add("shake");
+        setTimeout(() => btn.classList.remove("shake"), 500);
+
+      } else {
+        const data = JSON.parse(text);
+        alert(`로그인 성공!\n이름: ${data.name}\n좋아하는 인물: ${data.bible}`);
+      }
+
+    } catch (err) {
+      alert("네트워크 오류가 발생했습니다.");
+    }
+
+    btn.disabled = false;
+    btn.innerText = "로그인하기";
+    spinner.style.display = "none";
+  }
+
+  /* 회원가입 (폭죽 포함) */
   async function signup() {
-    const id = document.getElementById("newId").value.trim();
-    const password = document.getElementById("newPw").value.trim();
-    const name = document.getElementById("newName").value.trim();
-    const bible = document.getElementById("newFav").value.trim();
+    const id = newId.value.trim();
+    const password = newPw.value.trim();
+    const name = newName.value.trim();
+    const bible = newFav.value.trim();
+
+    const btn = signupBtn;
+    const spinner = signupSpinner;
 
     if (!id || !password || !name || !bible) {
       alert("모든 칸을 채워주세요!");
       return;
     }
 
-    await fetch(API_URL, {
-      method: "POST",
-      // **헤더 안 넣는다! (중요: CORS 단순 요청 유지)**
-      body: JSON.stringify({
-        type: "signup",
-        id, password, name, bible
-      })
-    });
+    btn.disabled = true;
+    btn.innerText = "가입 처리 중...";
+    spinner.style.display = "block";
 
-    alert("회원가입 완료!");
-    showLogin();
-  }
+    try {
+      await fetch(API_URL, {
+        method: "POST",
+        body: JSON.stringify({
+          type: "signup",
+          id, password, name, bible
+        })
+      });
 
-  // 로그인
-  async function login() {
-    const id = document.getElementById("loginId").value.trim();
-    const password = document.getElementById("loginPw").value.trim();
+      /* 🎉 폭죽 애니메이션 실행 */
+      confettiEffect();
 
-    const res = await fetch(API_URL, {
-      method: "POST",
-      body: JSON.stringify({
-        type: "login",
-        id, password
-      })
-    });
+      alert("회원가입 완료!");
+      showLogin();
 
-    const text = await res.text();
-    if (text === "login_fail") {
-      alert("로그인 실패! ID / PW를 다시 확인해 주세요.");
-      return;
+    } catch (err) {
+      alert("네트워크 오류가 발생했습니다.");
     }
 
-    const data = JSON.parse(text);
-    alert(`로그인 성공!\n이름: ${data.name}\n좋아하는 인물: ${data.bible}`);
-
-    // 여기서부터 game.html로 이동하거나, 게임 화면을 띄우면 됨
-    // window.location.href = "game.html";
+    btn.disabled = false;
+    btn.innerText = "가입하기";
+    spinner.style.display = "none";
   }
 
-  // 비밀번호 찾기
+  /* 비밀번호 찾기 */
   async function findPw() {
-    const name = document.getElementById("findName").value.trim();
-    const bible = document.getElementById("findFav").value.trim();
+    const name = findName.value.trim();
+    const bible = findFav.value.trim();
 
-    const res = await fetch(API_URL, {
-      method: "POST",
-      body: JSON.stringify({
-        type: "findPw",
-        name, bible
-      })
-    });
+    const btn = findPwBtn;
+    const spinner = findPwSpinner;
 
-    const text = await res.text();
-    if (text === "not_found") {
-      alert("일치하는 정보를 찾을 수 없습니다.");
-      return;
+    btn.disabled = true;
+    btn.innerText = "검색 중...";
+    spinner.style.display = "block";
+
+    try {
+      const res = await fetch(API_URL, {
+        method: "POST",
+        body: JSON.stringify({
+          type: "findPw",
+          name, bible
+        })
+      });
+
+      const text = await res.text();
+
+      if (text === "notfound") {
+        alert("일치하는 정보를 찾을 수 없습니다.");
+      } else {
+        const data = JSON.parse(text);
+        alert(`ID: ${data.id}\nPW: ${data.password}`);
+      }
+
+    } catch (err) {
+      alert("네트워크 오류가 발생했습니다.");
     }
 
-    const data = JSON.parse(text);
-    alert(`ID: ${data.id}\nPW: ${data.password}`);
+    btn.disabled = false;
+    btn.innerText = "비밀번호 찾기";
+    spinner.style.display = "none";
+  }
+
+  /* 🎆 폭죽 함수 */
+  function confettiEffect() {
+    const duration = 2000;
+    const end = Date.now() + duration;
+
+    (function frame() {
+      // 랜덤 위치와 컬러
+      const colors = ["#ffcc00", "#ff6699", "#66ccff", "#99ff66", "#ff9966"];
+      const confetti = document.createElement("div");
+
+      confetti.style.position = "fixed";
+      confetti.style.top = Math.random() * 40 + "%";
+      confetti.style.left = Math.random() * 80 + "%";
+      confetti.style.width = "10px";
+      confetti.style.height = "10px";
+      confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+      confetti.style.opacity = "0.9";
+      confetti.style.transform = "rotate(" + Math.random() * 360 + "deg)";
+      confetti.style.transition = "transform 1s ease-out, top 1s ease-out, opacity 1s";
+      document.body.appendChild(confetti);
+
+      setTimeout(() => {
+        confetti.style.top = "100%";
+        confetti.style.opacity = "0";
+        confetti.style.transform += " rotate(720deg)";
+      }, 10);
+
+      setTimeout(() => confetti.remove(), 2000);
+
+      if (Date.now() < end) requestAnimationFrame(frame);
+    })();
   }
 </script>
 
 </body>
 </html>
-
