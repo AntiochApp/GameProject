@@ -134,6 +134,8 @@
       width: min(640px, 95vw);
       box-shadow: 0 10px 30px rgba(0,0,0,0.6);
       border: 2px solid #b7935d;
+      overflow-y: auto;
+      max-height: 90vh;
     }
 
     .modal-header {
@@ -153,7 +155,7 @@
       border: none;
       background: transparent;
       cursor: pointer;
-      font-size: 18px;
+      font-size: 22px;
       font-weight: bold;
     }
 
@@ -205,7 +207,6 @@
       background: #8e5b32;
       color: #fff;
     }
-
     .shop-buy-btn:hover {
       filter: brightness(1.05);
     }
@@ -229,7 +230,6 @@
       color: #fff;
       box-shadow: 0 4px 10px rgba(0,0,0,0.35);
     }
-
     .gacha-btn:hover {
       filter: brightness(1.05);
     }
@@ -237,6 +237,18 @@
     .gacha-desc {
       font-size: 12px;
       color: #7a5b34;
+    }
+
+    /* 가챠 로그 */
+    .gacha-log-box {
+      margin-top: 15px;
+      background:#fff7e0;
+      padding:10px;
+      border-radius:10px;
+      border:1px solid #d8c6a4;
+      max-height:140px;
+      overflow-y:auto;
+      font-size:13px;
     }
 
     /* 간단한 토스트 */
@@ -253,13 +265,14 @@
       opacity: 0;
       pointer-events: none;
       transition: opacity 0.25s ease-out;
-      z-index: 20;
+      z-index: 50;
     }
     .toast.show {
       opacity: 1;
     }
   </style>
 </head>
+
 <body>
 <div class="overlay">
 
@@ -291,11 +304,15 @@
         <h2>Pilgrim 상점</h2>
         <button class="modal-close" onclick="closeShop()">×</button>
       </div>
+
       <div class="shop-faith" id="shopFaithText"></div>
 
-      <div class="shop-grid" id="shopGrid">
-        <!-- JS로 채움 -->
+      <!-- 랜덤뽑기 기록창 -->
+      <div id="randomLogBox" class="gacha-log-box">
+        <p style="margin:0; color:#999;">아직 기록이 없습니다.</p>
       </div>
+
+      <div class="shop-grid" id="shopGrid"></div>
 
       <div class="gacha-section">
         <div class="gacha-desc">랜덤 뽑기 (100F) – 큰 보상 또는 꽝!</div>
@@ -305,14 +322,16 @@
   </div>
 
   <div class="toast" id="toast"></div>
+
 </div>
 
 <script>
+
   const API_URL = "https://script.google.com/macros/s/AKfycbwUqF_7np5AgJTygWKEn8diNyiFmvAnHaSsY0Xz3zVMuw5bGnn6y2Wr35zmq-w_ZuHyTQ/exec";
 
-  // ====== 기본 상태 ======
   let playerId = localStorage.getItem("pilgrimPlayerId") || "";
   let playerName = localStorage.getItem("pilgrimPlayerName") || "로그인";
+
   let state = {
     str: 1,
     hp: 10,
@@ -323,35 +342,25 @@
     storyIndex: 0
   };
 
-  // 로컬 저장된 saveData 불러오기
   try {
     const saved = JSON.parse(localStorage.getItem("pilgrimSaveData") || "null");
-    if (saved) {
-      state = Object.assign(state, saved);
-    }
-  } catch (e) {}
+    if (saved) state = Object.assign(state, saved);
+  } catch(e){}
 
-  // ====== 스토리 예시 (원하면 나중에 실제 내용으로 교체) ======
+  /* 랜덤뽑기 로그 저장 (세션 유지) */
+  let randomLog = [];
+
+  /* 스토리 */
   const stories = [
-    {
-      ko: "오늘도 너의 신앙의 여정이 시작됩니다.",
-      en: "Today, your journey of faith begins again."
-    },
-    {
-      ko: "하나님은 작은 믿음도 소중히 여기십니다.",
-      en: "God treasures even a small amount of faith."
-    },
-    {
-      ko: "기도와 말씀으로 힘을 얻어 앞으로 나아가 보세요.",
-      en: "Gain strength through prayer and the Word, and move forward."
-    }
+    { ko:"오늘도 너의 신앙의 여정이 시작됩니다.", en:"Today, your journey of faith begins again." },
+    { ko:"하나님은 작은 믿음도 소중히 여기십니다.", en:"God treasures even a small amount of faith." },
+    { ko:"기도와 말씀으로 힘을 얻어 앞으로 나아가 보세요.", en:"Gain strength through prayer and the Word, and move forward." }
   ];
 
   function renderStory() {
-    const idx = Math.min(state.storyIndex || 0, stories.length - 1);
-    const s = stories[idx] || stories[0];
-    document.getElementById("storyKo").textContent = s.ko;
-    document.getElementById("storyEn").textContent = s.en;
+    const idx = Math.min(state.storyIndex, stories.length - 1);
+    document.getElementById("storyKo").textContent = stories[idx].ko;
+    document.getElementById("storyEn").textContent = stories[idx].en;
   }
 
   function nextStory() {
@@ -359,61 +368,31 @@
       state.storyIndex++;
       renderStory();
     } else {
-      showToast("마지막 스토리입니다. 추후 업데이트 예정!");
+      showToast("마지막 스토리입니다.");
     }
   }
 
-  // ====== 상단 정보 렌더 ======
+  /* 상단 정보 렌더 */
   function renderHeader() {
-    document.getElementById("playerName").textContent =
-      "Player: " + playerName;
+    document.getElementById("playerName").textContent = "Player: " + playerName;
     document.getElementById("statLine").textContent =
       `능력치 – STR:${state.str} | HP:${state.hp} | DEX:${state.dex} | DEF:${state.def} | LIFE:${state.life} | FAITH:${state.faith}`;
   }
 
-  // ====== 상점 ======
+  /* 상점 */
   const shopItems = [
-    { key: "str",  label: "힘 +1",   stat: "str",  amount: 1, cost: 10 },
-    { key: "hp",   label: "체력 +1", stat: "hp",   amount: 1, cost: 5 },
-    { key: "dex",  label: "회피 +1", stat: "dex", amount: 1, cost: 5 },
-    { key: "def",  label: "방어 +1", stat: "def", amount: 1, cost: 5 },
-    // LIFE 가격은 임의로 50F로 설정 (필요하면 숫자만 바꿔도 됨)
-    { key: "life", label: "목숨 +1", stat: "life", amount: 1, cost: 50 }
+    { label:"힘 +1", stat:"str",  amount:1, cost:10 },
+    { label:"체력 +1", stat:"hp", amount:1, cost:5 },
+    { label:"회피 +1", stat:"dex", amount:1, cost:5 },
+    { label:"방어 +1", stat:"def", amount:1, cost:5 },
+    { label:"목숨 +1", stat:"life",amount:1, cost:50 }
   ];
 
-  function buildShopGrid() {
-    const container = document.getElementById("shopGrid");
-    container.innerHTML = "";
-
-    shopItems.forEach(item => {
-      const div = document.createElement("div");
-      div.className = "shop-item";
-
-      const title = document.createElement("div");
-      title.className = "shop-item-title";
-      title.textContent = item.label;
-
-      const cost = document.createElement("div");
-      cost.className = "shop-item-cost";
-      cost.textContent = `${item.cost}F`;
-
-      const btn = document.createElement("button");
-      btn.className = "shop-buy-btn";
-      btn.textContent = "구입";
-      btn.onclick = () => buyItem(item);
-
-      div.appendChild(title);
-      div.appendChild(cost);
-      div.appendChild(btn);
-
-      container.appendChild(div);
-    });
-  }
-
   function openShop() {
-    buildShopGrid();
-    updateShopFaithText();
     document.getElementById("shopBackdrop").style.display = "flex";
+    updateShopFaithText();
+    buildShopGrid();
+    updateRandomLogUI();
   }
 
   function closeShop() {
@@ -423,6 +402,24 @@
   function updateShopFaithText() {
     document.getElementById("shopFaithText").textContent =
       `현재 신앙심(Faith): ${state.faith}F`;
+  }
+
+  function buildShopGrid() {
+    const box = document.getElementById("shopGrid");
+    box.innerHTML = "";
+    shopItems.forEach(item=>{
+      const div = document.createElement("div");
+      div.className="shop-item";
+
+      div.innerHTML = `
+        <div class="shop-item-title">${item.label}</div>
+        <div class="shop-item-cost">${item.cost}F</div>
+        <button class="shop-buy-btn">구입</button>
+      `;
+      
+      div.querySelector("button").onclick = ()=>buyItem(item);
+      box.appendChild(div);
+    });
   }
 
   function buyItem(item) {
@@ -435,53 +432,106 @@
 
     renderHeader();
     updateShopFaithText();
-    saveGame(true); // true = 조용히 저장
-
+    saveGame(true);
     showToast(`구입 완료: ${item.label}`);
   }
 
-  // ====== 랜덤 뽑기 ======
+  /* 로그 업데이트 */
+  function updateRandomLogUI() {
+    const box = document.getElementById("randomLogBox");
+    if (!randomLog.length) {
+      box.innerHTML = "<p style='margin:0;color:#999;'>아직 기록이 없습니다.</p>";
+      return;
+    }
+    box.innerHTML = randomLog
+      .map(item=>`<div>• ${item}</div>`)
+      .join("");
+  }
+
+  /* Gift Card 당첨 팝업 */
+  function showGiftPopup(itemName){
+    confettiEffect();
+
+    const back = document.createElement("div");
+    back.style = `
+      position:fixed; inset:0; 
+      background:rgba(0,0,0,0.75);
+      display:flex; align-items:center; justify-content:center;
+      z-index:200;
+    `;
+
+    const card = document.createElement("div");
+    card.style = `
+      background:white; width:80%; max-width:420px;
+      padding:30px; border-radius:20px;
+      text-align:center; box-shadow:0 10px 30px rgba(0,0,0,0.5);
+    `;
+
+    card.innerHTML = `
+      <h2 style="font-size:28px; color:#d33; margin-bottom:10px;">🎉 CONGRATULATIONS! 🎉</h2>
+      <div style="font-size:22px; margin-bottom:20px;">
+        You won:<br><strong style="font-size:26px; color:#2a6;">${itemName}</strong>
+      </div>
+      <p style="font-size:15px; margin-bottom:6px;">
+        📸 스크린샷을 찍어서 이재관 목사님께 카톡으로 보내주세요!
+      </p>
+      <p style="font-size:13px; color:#666;">
+        📸 Please take a screenshot and send it to Pastor Jaegwan via KakaoTalk!
+      </p>
+      <button style="margin-top:20px; background:#444; color:white;
+                     padding:10px 20px; border-radius:8px; border:none; cursor:pointer;"
+              onclick="this.parentElement.parentElement.remove()">
+        닫기 Close
+      </button>
+    `;
+
+    back.appendChild(card);
+    document.body.appendChild(back);
+  }
+
+  /* 랜덤뽑기 */
   const gachaCost = 100;
 
   const gachaTable = [
-    { text: "힘 +1",      apply: () => { state.str += 1; },  weight: 7 },
-    { text: "힘 +5",      apply: () => { state.str += 5; },  weight: 7 },
-    { text: "힘 +10",     apply: () => { state.str += 10; }, weight: 3 },
+    { text:"힘 +1",      apply:()=>{state.str+=1;},    weight:7 },
+    { text:"힘 +5",      apply:()=>{state.str+=5;},    weight:7 },
+    { text:"힘 +10",     apply:()=>{state.str+=10;},   weight:3 },
 
-    { text: "체력 +1",    apply: () => { state.hp += 1; },   weight: 7 },
-    { text: "체력 +5",    apply: () => { state.hp += 5; },   weight: 7 },
-    { text: "체력 +10",   apply: () => { state.hp += 10; },  weight: 3 },
+    { text:"체력 +1",    apply:()=>{state.hp+=1;},     weight:7 },
+    { text:"체력 +5",    apply:()=>{state.hp+=5;},     weight:7 },
+    { text:"체력 +10",   apply:()=>{state.hp+=10;},    weight:3 },
 
-    { text: "회피 +1",    apply: () => { state.dex += 1; },  weight: 7 },
-    { text: "회피 +5",    apply: () => { state.dex += 5; },  weight: 7 },
-    { text: "회피 +10",   apply: () => { state.dex += 10; }, weight: 3 },
+    { text:"회피 +1",    apply:()=>{state.dex+=1;},    weight:7 },
+    { text:"회피 +5",    apply:()=>{state.dex+=5;},    weight:7 },
+    { text:"회피 +10",   apply:()=>{state.dex+=10;},   weight:3 },
 
-    { text: "방어 +1",    apply: () => { state.def += 1; },  weight: 7 },
-    { text: "방어 +5",    apply: () => { state.def += 5; },  weight: 7 },
-    { text: "방어 +10",   apply: () => { state.def += 10; }, weight: 3 },
+    { text:"방어 +1",    apply:()=>{state.def+=1;},    weight:7 },
+    { text:"방어 +5",    apply:()=>{state.def+=5;},    weight:7 },
+    { text:"방어 +10",   apply:()=>{state.def+=10;},   weight:3 },
 
-    { text: "신앙심 +50", apply: () => { state.faith += 50; }, weight: 5 },
-    { text: "신앙심 +100",apply: () => { state.faith += 100; },weight: 1 },
+    { text:"신앙심 +50", apply:()=>{state.faith+=50;}, weight:5 },
+    { text:"신앙심 +100",apply:()=>{state.faith+=100;},weight:1 },
 
-    { text: "목숨 +1",    apply: () => { state.life += 1; }, weight: 2 },
-    { text: "목숨 +2",    apply: () => { state.life += 2; }, weight: 1 },
-    { text: "목숨 +3",    apply: () => { state.life += 3; }, weight: 1.82 },
+    { text:"목숨 +1",    apply:()=>{state.life+=1;},   weight:2 },
+    { text:"목숨 +2",    apply:()=>{state.life+=2;},   weight:1 },
+    { text:"목숨 +3",    apply:()=>{state.life+=3;},   weight:1.82 },
 
-    { text: "Starbucks Gift Card $5",  apply: () => {}, weight: 0.5 },
-    { text: "Starbucks Gift Card $10", apply: () => {}, weight: 0.05 },
-    { text: "Starbucks Gift Card $20", apply: () => {}, weight: 0.01 },
+    { text:"Starbucks Gift Card $5",  apply:()=>{}, weight:0.5 },
+    { text:"Starbucks Gift Card $10", apply:()=>{}, weight:0.05 },
+    { text:"Starbucks Gift Card $20", apply:()=>{}, weight:0.01 },
 
-    { text: "Amazon Gift Card $10",    apply: () => {}, weight: 0.05 },
-    { text: "Amazon Gift Card $20",    apply: () => {}, weight: 0.01 },
+    { text:"Amazon Gift Card $10",    apply:()=>{}, weight:0.05 },
+    { text:"Amazon Gift Card $20",    apply:()=>{}, weight:0.01 },
 
-    { text: "Google Play Gift Card $5",  apply: () => {}, weight: 0.5 },
-    { text: "Google Play Gift Card $10", apply: () => {}, weight: 0.05 },
-    { text: "Google Play Gift Card $20", apply: () => {}, weight: 0.01 },
+    { text:"Google Play Gift Card $5",  apply:()=>{}, weight:0.5 },
+    { text:"Google Play Gift Card $10", apply:()=>{}, weight:0.05 },
+    { text:"Google Play Gift Card $20", apply:()=>{}, weight:0.01 },
 
-    { text: "꽝", apply: () => {}, weight: 20 }
+    { text:"꽝", apply:()=>{}, weight:20 }
   ];
 
   function rollGacha() {
+
     if (state.faith < gachaCost) {
       showToast("신앙심이 부족합니다! (100F 필요)");
       return;
@@ -489,11 +539,10 @@
 
     state.faith -= gachaCost;
 
-    // 가중치 랜덤
-    const total = gachaTable.reduce((s, x) => s + x.weight, 0);
+    let total = gachaTable.reduce((s,x)=>s+x.weight, 0);
     let r = Math.random() * total;
-    let chosen = gachaTable[gachaTable.length - 1];
 
+    let chosen = gachaTable[gachaTable.length-1];
     for (const entry of gachaTable) {
       if (r < entry.weight) {
         chosen = entry;
@@ -502,93 +551,94 @@
       r -= entry.weight;
     }
 
-    // 효과 적용
-    chosen.apply();
-    renderHeader();
-    updateShopFaithText();
+    /* 로그 추가 */
+    const time = new Date().toLocaleTimeString("ko-KR", {hour:"2-digit", minute:"2-digit"});
+    randomLog.unshift(`${time} → ${chosen.text}`);
+    updateRandomLogUI();
 
-    // 폭죽 + 알림
-    confettiEffect();
-    showToast("랜덤 뽑기 결과: " + chosen.text);
-
-    saveGame(true); // 조용히 자동 저장
-  }
-
-  // ====== 저장 ======
-  async function saveGame(silent = false) {
-    if (!playerId) {
-      if (!silent) alert("로그인 정보가 없습니다. index.html에서 다시 로그인 해주세요.");
+    /* Gift Card 당첨이면 팝업 */
+    if (chosen.text.includes("Gift Card")) {
+      showGiftPopup(chosen.text);
       return;
     }
 
-    // 로컬에도 업데이트
+    /* 일반 보상 */
+    chosen.apply();
+    renderHeader();
+    updateShopFaithText();
+    saveGame(true);
+
+    confettiEffect();
+    showToast("랜덤 뽑기: " + chosen.text);
+  }
+
+  /* 저장 */
+  async function saveGame(silent=false){
+    if (!playerId) {
+      if (!silent) alert("로그인이 필요합니다.");
+      return;
+    }
     localStorage.setItem("pilgrimSaveData", JSON.stringify(state));
 
     try {
-      const res = await fetch(API_URL, {
-        method: "POST",
-        body: JSON.stringify({
-          type: "save",
-          id: playerId,
-          saveData: state
+      const r = await fetch(API_URL,{
+        method:"POST",
+        body:JSON.stringify({
+          type:"save",
+          id:playerId,
+          saveData:state
         })
       });
-
-      const text = await res.text();
-      if (!silent) {
-        if (text === "saved") {
-          showToast("저장 완료!");
-        } else {
-          showToast("저장 실패: " + text);
-        }
+      const t = await r.text();
+      if(!silent){
+        if(t==="saved") showToast("저장됨!");
+        else showToast("저장 실패");
       }
-    } catch (err) {
-      if (!silent) alert("저장 중 오류가 발생했습니다.");
+    } catch(e){
+      if(!silent) alert("저장 오류");
     }
   }
 
-  // ====== 간단한 토스트 & 폭죽 ======
-  function showToast(msg) {
+  /* 토스트 */
+  function showToast(msg){
     const t = document.getElementById("toast");
     t.textContent = msg;
     t.classList.add("show");
-    setTimeout(() => t.classList.remove("show"), 2000);
+    setTimeout(()=>t.classList.remove("show"), 2000);
   }
 
+  /* 폭죽 */
   function confettiEffect() {
-    const duration = 1500;
+    const duration = 1200;
     const end = Date.now() + duration;
 
-    (function frame() {
-      const colors = ["#ffcc00", "#ff6699", "#66ccff", "#99ff66", "#ff9966"];
-      const conf = document.createElement("div");
-      conf.style.position = "fixed";
-      conf.style.top = (Math.random() * 40) + "%";
-      conf.style.left = (Math.random() * 80 + 10) + "%";
-      conf.style.width = "8px";
-      conf.style.height = "14px";
-      conf.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
-      conf.style.opacity = "0.95";
-      conf.style.transform = "rotate(" + (Math.random()*360) + "deg)";
-      conf.style.transition = "transform 1s ease-out, top 1s ease-out, opacity 1s";
-      conf.style.zIndex = 30;
-      document.body.appendChild(conf);
-
-      setTimeout(() => {
-        conf.style.top = "100%";
-        conf.style.opacity = "0";
-        conf.style.transform += " translateY(20px) rotate(720deg)";
-      }, 10);
-
-      setTimeout(() => conf.remove(), 1800);
-
-      if (Date.now() < end) requestAnimationFrame(frame);
+    (function frame(){
+      const colors = ["#ffcc00","#ff6699","#66ccff","#99ff66","#ff9966"];
+      const div = document.createElement("div");
+      div.style = `
+        position:fixed; top:${Math.random()*40}%; left:${Math.random()*80+10}%;
+        width:8px; height:14px;
+        background:${colors[Math.floor(Math.random()*colors.length)]};
+        opacity:0.95; transform:rotate(${Math.random()*360}deg);
+        transition: transform 1s ease-out, top 1s ease-out, opacity 1s;
+        z-index:300;
+      `;
+      document.body.appendChild(div);
+      setTimeout(()=>{
+        div.style.top="100%";
+        div.style.opacity="0";
+        div.style.transform+=" rotate(720deg)";
+      },10);
+      setTimeout(()=>div.remove(),1500);
+      if(Date.now() < end) requestAnimationFrame(frame);
     })();
   }
 
-  // ====== 초기 실행 ======
+  /* 초기 실행 */
   renderHeader();
   renderStory();
+
 </script>
+
 </body>
 </html>
