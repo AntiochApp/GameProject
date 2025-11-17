@@ -655,59 +655,74 @@
 
   /* Gift Card 당첨 팝업 */
   function showGiftPopup(itemName){
-    confettiEffect();
+  const back = document.createElement("div");
+  back.style = `
+    position:fixed; inset:0; 
+    background:rgba(0,0,0,0.75);
+    display:flex; align-items:center; justify-content:center;
+    z-index:200;
+  `;
 
-    const back = document.createElement("div");
-    back.style = `
-      position:fixed; inset:0; 
-      background:rgba(0,0,0,0.75);
-      display:flex; align-items:center; justify-content:center;
-      z-index:200;
-    `;
+  const card = document.createElement("div");
+  card.style = `
+    background:white; width:80%; max-width:420px;
+    padding:30px; border-radius:20px;
+    text-align:center; box-shadow:0 10px 30px rgba(0,0,0,0.5);
+  `;
 
-    const card = document.createElement("div");
-    card.style = `
-      background:white; width:80%; max-width:420px;
-      padding:30px; border-radius:20px;
-      text-align:center; box-shadow:0 10px 30px rgba(0,0,0,0.5);
-    `;
+  card.innerHTML = `
+    <h2 style="font-size:28px; color:#d33; margin-bottom:10px;">
+      🎉 CONGRATULATIONS! 🎉
+    </h2>
 
-    card.innerHTML = `
-      <h2 style="font-size:28px; color:#d33; margin-bottom:10px;">🎉 CONGRATULATIONS! 🎉</h2>
-      <div style="font-size:22px; margin-bottom:20px;">
-        You won:<br><strong style="font-size:26px; color:#2a6;">${itemName}</strong>
-      </div>
-      <p style="font-size:15px; margin-bottom:6px;">
-        📸 스크린샷을 찍어서 이재관 목사님께 카톡으로 보내주세요!
-      </p>
-      <p style="font-size:13px; color:#666;">
-        📸 Please take a screenshot and send it to Pastor Jaegwan via KakaoTalk!
-      </p>
-      <button style="margin-top:20px; background:#444; color:white;
-                     padding:10px 20px; border-radius:8px; border:none; cursor:pointer;"
-              onclick="this.parentElement.parentElement.remove()">
-        닫기 Close
-      </button>
-    
-      <button 
-  style="
-    margin-top:12px; 
-    background:#2a6; 
-    color:white;
-    padding:10px 18px; 
-    border-radius:8px; 
-    border:none; 
-    cursor:pointer;
-  " 
-  onclick="captureScreenshot()"
->
-  📸 스크린샷 찍기
-</button>
-    `;
+    <div style="font-size:22px; margin-bottom:20px;">
+      You won:<br>
+      <strong style="font-size:26px; color:#2a6;">${itemName}</strong>
+    </div>
 
-    back.appendChild(card);
-    document.body.appendChild(back);
-  }
+    <p style="font-size:15px; margin-bottom:6px;">
+      📸 스크린샷을 찍어서 이재관 목사님께 카톡으로 보내주세요!
+    </p>
+    <p style="font-size:13px; color:#666;">
+      📸 Please take a screenshot and send it to Pastor Jaegwan via KakaoTalk!
+    </p>
+
+    <button 
+      style="
+        margin-top:12px;
+        background:#2a6;
+        color:white;
+        padding:10px 18px;
+        border-radius:8px;
+        border:none;
+        cursor:pointer;
+      "
+      onclick="captureScreenshot()"
+    >
+      📷 스크린샷 찍기
+    </button>
+
+    <br>
+
+    <button 
+      style="
+        margin-top:20px;
+        background:#444;
+        color:white;
+        padding:10px 20px;
+        border-radius:8px;
+        border:none;
+        cursor:pointer;
+      "
+      onclick="this.parentElement.parentElement.remove()"
+    >
+      닫기 Close
+    </button>
+  `;
+
+  back.appendChild(card);
+  document.body.appendChild(back);
+}
 
   /* 랜덤뽑기 */
   const gachaCost = 50;
@@ -991,7 +1006,7 @@
   renderHeader();
   renderStory();
   fetchChat(true);                     // 처음 채팅 불러오기
-  chatPollTimer = setInterval(fetchChat, 2000); // 5초마다 갱신
+  chatPollTimer = setInterval(fetchChat, 1000); // 5초마다 갱신
 
   async function captureScreenshot() {
   try {
@@ -1036,5 +1051,6 @@
 
 </body>
 </html>
+
 
 
