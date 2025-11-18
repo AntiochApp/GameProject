@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8" />
-  <title>Pilgrim's Journey – Game (FULL)</title>
+  <title>Pilgrim's Journey – Game</title>
   <style>
     body {
       margin: 0;
@@ -17,6 +17,7 @@
       width: 100%;
       box-sizing: border-box;
       padding: 16px;
+      position: relative;
     }
 
     /* 상단 바 */
@@ -24,12 +25,12 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      background: rgba(60,60,60,0.95);
+      background: rgba(30,30,30,0.95);
       color: #f5f5f5;
       padding: 8px 16px;
       border-radius: 8px;
       box-shadow: 0 3px 10px rgba(0,0,0,0.4);
-      margin-bottom: 12px;
+      margin-bottom: 10px;
     }
 
     .player-info {
@@ -63,17 +64,11 @@
       background: #8e5b32;
       box-shadow: 0 2px 5px rgba(0,0,0,0.35);
     }
-    .btn-top.chat {
-      background: #5c6bc0;
-    }
-    .btn-top.save {
-      background: #407a3b;
-    }
-    .btn-top:hover {
-      filter: brightness(1.05);
-    }
+    .btn-top.chat { background: #5c6bc0; }
+    .btn-top.save { background: #407a3b; }
+    .btn-top:hover { filter: brightness(1.05); }
 
-    /* 미니 채팅 바 (스토리 위 2줄) */
+    /* 미니 채팅 바 */
     .chat-mini-wrapper {
       display: flex;
       justify-content: center;
@@ -81,21 +76,19 @@
     }
     .chat-mini {
       width: min(900px, 90vw);
-      background: rgba(30, 30, 30, 0.85);
+      background: rgba(20, 20, 20, 0.9);
       border-radius: 14px;
       padding: 6px 12px;
       box-shadow: 0 4px 12px rgba(0,0,0,0.6);
-      border: 1px solid rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.06);
       font-size: 12px;
       color: #f5f2e9;
-      font-family: "Georgia", system-ui, sans-serif;
     }
     .chat-mini-line {
       display: flex;
       gap: 6px;
       align-items: baseline;
       line-height: 1.3;
-      opacity: 0.95;
     }
     .chat-mini-name {
       color: #ffe082;
@@ -114,36 +107,39 @@
       text-align: center;
     }
 
-    /* 스토리 카드 */
+    /* 스토리 카드 전체 */
     .story-wrapper {
       display: flex;
       justify-content: center;
-      margin-top: 12px;
+      margin-top: 8px;
     }
 
     .story-card {
       width: min(900px, 90vw);
-      background: rgba(255,255,245,0.94);
+      background: rgba(255,255,245,0.96);
       border-radius: 18px;
-      padding: 24px 28px 28px;
+      padding: 20px 26px 16px;
       box-shadow: 0 8px 24px rgba(0,0,0,0.45);
       border: 1px solid rgba(220,200,160,0.9);
       position: relative;
       overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
     }
 
-    .story-card::before {
-      content: "";
-      position: absolute;
-      inset: 0;
-      background: radial-gradient(circle at top left, rgba(255,255,255,0.5), transparent 55%),
-                  radial-gradient(circle at bottom right, rgba(230,210,170,0.35), transparent 60%);
-      pointer-events: none;
-    }
-
-    .story-content {
+    .story-inner {
       position: relative;
       z-index: 1;
+      min-height: 140px;
+    }
+
+    /* 스토리 VIEW */
+    #storyView {
+      display: block;
+    }
+    #battleView {
+      display: none;
     }
 
     .story-ko {
@@ -157,13 +153,12 @@
     .story-en {
       font-size: 14px;
       color: #665544;
-      margin-bottom: 18px;
+      margin-bottom: 16px;
       white-space: pre-line;
     }
 
-    /* 선택지 (RPG 스타일) */
     .choice-container {
-      margin-top: 8px;
+      margin-top: 6px;
       display: flex;
       flex-direction: column;
       gap: 6px;
@@ -180,37 +175,120 @@
       position: relative;
       overflow: hidden;
     }
-
     .choice-btn::before {
       content: "▶";
       margin-right: 6px;
       color: #b07a3b;
     }
-
     .choice-btn:hover {
       filter: brightness(1.04);
       box-shadow: 0 2px 6px rgba(0,0,0,0.18);
     }
 
-    .choice-btn:disabled {
-      opacity: 0.55;
+    /* 전투 VIEW (고전 RPG 느낌) */
+    .battle-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+    .battle-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: #3b2615;
+    }
+    .battle-turn {
+      font-size: 12px;
+      color: #7a5b34;
+    }
+
+    .battle-stats {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0,1fr));
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+    .battle-box {
+      background: rgba(255,255,255,0.95);
+      border-radius: 10px;
+      padding: 8px 10px;
+      border: 1px solid #d8c6a4;
+      font-size: 13px;
+    }
+    .battle-name {
+      font-weight: 700;
+      margin-bottom: 4px;
+      color: #4b2d16;
+    }
+    .hp-bar-wrap {
+      width: 100%;
+      height: 10px;
+      background: #eee0c7;
+      border-radius: 999px;
+      overflow: hidden;
+      margin-top: 2px;
+      margin-bottom: 4px;
+    }
+    .hp-bar {
+      height: 100%;
+      background: linear-gradient(90deg,#e53935,#ffb74d);
+      width: 100%;
+    }
+    .battle-line {
+      font-size: 12px;
+      color: #5d4037;
+    }
+
+    .battle-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 6px;
+      margin-bottom: 4px;
+    }
+    .battle-btn {
+      border-radius: 999px;
+      border: none;
+      padding: 7px 14px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.25);
+    }
+    .battle-btn.attack { background:#8e5b32; color:#fff; }
+    .battle-btn.run    { background:#b0bec5; color:#263238; }
+    .battle-btn.pray   { background:#5c6bc0; color:#fff; }
+    .battle-btn:disabled {
+      opacity: 0.45;
       cursor: default;
       box-shadow: none;
     }
 
-    /* 전투/결과 로그 */
-    .story-log {
-      margin-top: 14px;
-      padding: 6px 10px;
-      border-radius: 9px;
-      background: rgba(255,248,224,0.9);
+    .battle-log {
+      margin-top: 6px;
+      background: #fff8e1;
+      border-radius: 10px;
+      border: 1px solid #e0c38a;
+      padding: 8px 10px;
+      font-size: 12px;
+      max-height: 120px;
+      overflow-y: auto;
+    }
+
+    /* 공통 로그 패널 (스토리/전투 요약) */
+    .log-panel {
+      background: rgba(255,255,255,0.9);
+      border-radius: 10px;
       border: 1px solid rgba(214,189,135,0.9);
-      font-size: 13px;
+      padding: 6px 10px;
+      font-size: 12px;
       color: #4a3a1e;
-      min-height: 18px;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
+      max-height: 80px;
+      overflow-y: auto;
+    }
+    .log-empty {
+      color: #a1887f;
+      font-style: italic;
     }
 
     /* 공통 모달 배경 */
@@ -240,7 +318,7 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 12px;
+      margin-bottom: 10px;
     }
 
     .modal-header h2 {
@@ -267,7 +345,7 @@
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
       gap: 10px;
-      margin-bottom: 16px;
+      margin-bottom: 14px;
     }
 
     .shop-item {
@@ -305,13 +383,11 @@
       background: #8e5b32;
       color: #fff;
     }
-    .shop-buy-btn:hover {
-      filter: brightness(1.05);
-    }
+    .shop-buy-btn:hover { filter: brightness(1.05); }
 
     .gacha-section {
       border-top: 1px dashed #c7b08a;
-      padding-top: 10px;
+      padding-top: 8px;
       margin-top: 6px;
       text-align: center;
     }
@@ -328,28 +404,26 @@
       color: #fff;
       box-shadow: 0 4px 10px rgba(0,0,0,0.35);
     }
-    .gacha-btn:hover {
-      filter: brightness(1.05);
-    }
+    .gacha-btn:hover { filter: brightness(1.05); }
 
     .gacha-desc {
       font-size: 12px;
       color: #7a5b34;
     }
 
-    /* 가챠 로그 */
     .gacha-log-box {
-      margin-top: 15px;
+      margin-top: 10px;
+      margin-bottom: 10px;
       background:#fff7e0;
       padding:10px;
       border-radius:10px;
       border:1px solid #d8c6a4;
-      max-height:140px;
+      max-height:100px;
       overflow-y:auto;
       font-size:13px;
     }
 
-    /* 채팅 모달 (RPG 스타일) */
+    /* 채팅 모달 */
     .chat-modal {
       background: radial-gradient(circle at top, #f9f0dc 0%, #e6d4b2 40%, #d0b58a 100%);
       border-radius: 20px;
@@ -467,15 +541,38 @@
       color: #fff;
       box-shadow: 0 2px 5px rgba(0,0,0,0.35);
     }
-    .chat-send-btn:hover {
-      filter: brightness(1.05);
-    }
+    .chat-send-btn:hover { filter: brightness(1.05); }
 
     .chat-empty {
       font-size: 12px;
       color: #8d6e63;
       text-align: center;
       margin-top: 12px;
+    }
+
+    /* 게임 오버 오버레이 */
+    .gameover-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.85);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 200;
+    }
+    .gameover-card {
+      text-align: center;
+      color: #fff;
+    }
+    .gameover-title {
+      font-size: 48px;
+      font-weight: 900;
+      letter-spacing: 4px;
+      margin-bottom: 10px;
+    }
+    .gameover-sub {
+      font-size: 18px;
+      opacity: 0.85;
     }
 
     /* 토스트 */
@@ -494,9 +591,7 @@
       transition: opacity 0.25s ease-out;
       z-index: 50;
     }
-    .toast.show {
-      opacity: 1;
-    }
+    .toast.show { opacity: 1; }
   </style>
 </head>
 
@@ -516,25 +611,73 @@
     </div>
   </div>
 
-  <!-- 미니 채팅 바 (최근 2개) -->
+  <!-- 미니 채팅 바 -->
   <div class="chat-mini-wrapper">
     <div class="chat-mini" id="chatMini">
       <div class="chat-mini-empty">채팅이 아직 없습니다. 친구들에게 먼저 말을 걸어보세요!</div>
     </div>
   </div>
 
-  <!-- 스토리 카드 -->
+  <!-- 스토리 + 전투 카드 -->
   <div class="story-wrapper">
     <div class="story-card">
-      <div class="story-content">
-        <div class="story-ko" id="storyKo">스토리가 여기에 표시됩니다.</div>
-        <div class="story-en" id="storyEn">The story text will appear here.</div>
 
-        <!-- 선택지 영역 / 전투 버튼 -->
-        <div id="choiceContainer" class="choice-container"></div>
+      <div class="story-inner">
 
-        <!-- 전투/도망/결과 등 한 줄 로그 -->
-        <div class="story-log" id="storyLog"></div>
+        <!-- 스토리 VIEW -->
+        <div id="storyView">
+          <div class="story-ko" id="storyKo">스토리가 여기에 표시됩니다.</div>
+          <div class="story-en" id="storyEn">The story text will appear here.</div>
+          <div id="choiceContainer" class="choice-container"></div>
+        </div>
+
+        <!-- 전투 VIEW (고전 RPG 스타일) -->
+        <div id="battleView">
+          <div class="battle-header">
+            <div class="battle-title" id="battleTitle">전투</div>
+            <div class="battle-turn" id="battleTurnText">Turn 1</div>
+          </div>
+
+          <div class="battle-stats">
+            <div class="battle-box">
+              <div class="battle-name" id="playerBattleName">Player</div>
+              <div class="battle-line" id="playerBattleHpText">HP 10 / 10</div>
+              <div class="hp-bar-wrap">
+                <div class="hp-bar" id="playerHpBar"></div>
+              </div>
+              <div class="battle-line" id="playerBattleStats">
+                STR 1 | DEX 1 | DEF 1 | LIFE 1
+              </div>
+            </div>
+
+            <div class="battle-box">
+              <div class="battle-name" id="enemyBattleName">Enemy</div>
+              <div class="battle-line" id="enemyBattleHpText">HP 10 / 10</div>
+              <div class="hp-bar-wrap">
+                <div class="hp-bar" id="enemyHpBar"></div>
+              </div>
+              <div class="battle-line" id="enemyBattleStats">
+                ATK ? | DEX ? | DEF ?
+              </div>
+            </div>
+          </div>
+
+          <div class="battle-actions">
+            <button class="battle-btn attack" onclick="rpgAttack()">⚔ 공격</button>
+            <button class="battle-btn pray" id="prayBtn" onclick="usePrayerSkill()">🙏 기도 스킬</button>
+            <button class="battle-btn run" onclick="rpgRun()">🏃 도망</button>
+          </div>
+
+          <div class="battle-log" id="battleLog">
+            전투가 시작되었습니다.
+          </div>
+        </div>
+
+      </div>
+
+      <!-- 하단 로그 패널 -->
+      <div class="log-panel" id="logPanel">
+        <div class="log-empty">아직 로그가 없습니다.</div>
       </div>
     </div>
   </div>
@@ -549,7 +692,6 @@
 
       <div class="shop-faith" id="shopFaithText"></div>
 
-      <!-- 랜덤뽑기 기록창 -->
       <div id="randomLogBox" class="gacha-log-box">
         <p style="margin:0; color:#999;">아직 기록이 없습니다.</p>
       </div>
@@ -571,9 +713,7 @@
         <button class="modal-close" onclick="closeChat()">×</button>
       </div>
       <div class="chat-modal-body">
-        <div class="chat-messages" id="chatMessages">
-          <!-- JS로 채움 -->
-        </div>
+        <div class="chat-messages" id="chatMessages"></div>
         <div class="chat-input-row">
           <input id="chatInput" type="text" maxlength="100"
                  placeholder="메시지를 입력하고 Enter를 눌러보세요. (최대 100자)">
@@ -583,15 +723,24 @@
     </div>
   </div>
 
+  <!-- GAME OVER 오버레이 -->
+  <div class="gameover-backdrop" id="gameOverOverlay">
+    <div class="gameover-card">
+      <div class="gameover-title">GAME OVER</div>
+      <div class="gameover-sub">3초 후 처음으로 돌아갑니다...</div>
+    </div>
+  </div>
+
   <div class="toast" id="toast"></div>
 
 </div>
 
 <script>
   /* ---------------- 기본 설정 ---------------- */
+
   const API_URL = "https://script.google.com/macros/s/AKfycbwUqF_7np5AgJTygWKEn8diNyiFmvAnHaSsY0Xz3zVMuw5bGnn6y2Wr35zmq-w_ZuHyTQ/exec";
 
-  let playerId = localStorage.getItem("pilgrimPlayerId") || "";
+  let playerId   = localStorage.getItem("pilgrimPlayerId")   || "";
   let playerName = localStorage.getItem("pilgrimPlayerName") || "로그인";
 
   const defaultState = {
@@ -619,62 +768,24 @@
   if (!state.storyKey) state.storyKey = "0-0";
   if (state.life == null) state.life = 1;
 
-  /* 랜덤뽑기 로그 (세션 유지) */
-  let randomLog = [];
+  /* ---------------- 로그 ---------------- */
 
-  /* 채팅 데이터 */
-  let chatMessages = [];
-  let chatPollTimer = null;
+  const logLines = [];
 
-  /* ---------------- 확률 계산 함수 (RPS 전투 / 도망 등) ---------------- */
+  function addLog(msg){
+    const time = new Date().toLocaleTimeString("ko-KR",{hour:"2-digit",minute:"2-digit"});
+    logLines.unshift(`${time} - ${msg}`);
+    if (logLines.length > 40) logLines.pop();
 
-  function chance(p){
-    return Math.random() < p;
+    const box = document.getElementById("logPanel");
+    if (!logLines.length) {
+      box.innerHTML = `<div class="log-empty">아직 로그가 없습니다.</div>`;
+      return;
+    }
+    box.innerHTML = logLines.map(line=>`<div>• ${line}</div>`).join("");
   }
 
-  function getAttackWinChance() {          // RPS 승리 확률
-    const base = 0.4;
-    const perStr = 0.0001;
-    let c = base + perStr * state.str;
-    return Math.min(c, 0.8);
-  }
-
-  function getDefenseChance() {            // 패배 시 데미지 방어 확률
-    const perDef = 0.0001;
-    let c = perDef * state.def;
-    return Math.min(c, 0.8);
-  }
-
-  function getRunChanceInBattleRps() {     // RPS 전투 도망 확률
-    const base = 0.10;
-    const perDex = 0.0001;
-    let c = base + perDex * state.dex;
-    return Math.min(c, 0.7);
-  }
-
-  function getRunChanceEncounter() {       // 스토리 상 조우에서 도망
-    const base = 0.5;
-    const perDex = 0.0001;
-    let c = base + perDex * state.dex;
-    return Math.min(c, 0.9);
-  }
-
-  /* ---- RPG 전투용 확률 ---- */
-  function getRpgDodgeChance() {
-    const base = 0.05;
-    const perDex = 0.002; // DEX 50이면 +10%
-    let c = base + perDex * state.dex;
-    return Math.min(c, 0.4);  // 최대 40%
-  }
-
-  function getRpgRunChance() {
-    const base = 0.2;
-    const perDex = 0.002;
-    let c = base + perDex * state.dex;
-    return Math.min(c, 0.8);
-  }
-
-  /* ---------------- 스토리 데이터 (기본 + 샘플 전투씬) ---------------- */
+  /* ---------------- 스토리 데이터 ---------------- */
 
   const scenes = {
     "0-0": {
@@ -696,7 +807,7 @@ Will you stay in Sodom, or will you leave?`,
           text: "1. 소돔에 남는다 (Stay in Sodom)",
           action: () => {
             state.branch = 1;
-            setStoryLog("당신은 소돔에 남기로 결정했습니다.");
+            addLog("당신은 소돔에 남기로 결정했습니다.");
             gotoScene("1-1");
           }
         },
@@ -704,7 +815,7 @@ Will you stay in Sodom, or will you leave?`,
           text: "2. 소돔을 떠난다 (Leave Sodom)",
           action: () => {
             state.branch = 2;
-            setStoryLog("당신은 소돔을 떠나기로 결정했습니다.");
+            addLog("당신은 소돔을 떠나기로 결정했습니다.");
             gotoScene("2-1");
           }
         }
@@ -729,15 +840,15 @@ What will you do, {player}?`,
         {
           text: "1. 함께한다 (Go with them)",
           action: () => {
-            setStoryLog("유혹에 따라갔습니다... 영적, 육적으로 지쳐 HP가 10 감소합니다.");
-            applyDamage(10);
+            addLog("유혹에 따라갔습니다... 영적, 육적으로 지쳐 HP가 10 감소합니다.");
+            applyDamage(10, "유혹에 넘어감");
             gotoRandomStoryInBranch(1);
           }
         },
         {
-          text: "2. 싸운다 (Fight - RPS)",
+          text: "2. 싸운다 (Fight – 가위바위보)",
           action: () => {
-            setStoryLog("싸우기로 결심했습니다. 가위바위보 전투가 시작됩니다.");
+            addLog("싸우기로 결심했습니다. 가위바위보 전투가 시작됩니다.");
             startRpsBattle();
           }
         },
@@ -769,7 +880,7 @@ Where will you go now?`,
           text: "1. 하나님께 기도하며 길을 묻는다 (Pray and ask God for direction)",
           action: () => {
             state.faith += 5;
-            setStoryLog("하나님께 기도했습니다. 신앙심 +5");
+            addLog("하나님께 기도했습니다. 신앙심 +5");
             renderHeader();
             saveGame(true);
             gotoRandomStoryInBranch(2);
@@ -778,14 +889,14 @@ Where will you go now?`,
         {
           text: "2. 그냥 앞에 보이는 길로 간다 (Just follow the road)",
           action: () => {
-            setStoryLog("아무 계획 없이 길을 따라 걷습니다...");
+            addLog("아무 계획 없이 길을 따라 걷습니다...");
             gotoRandomStoryInBranch(2);
           }
         }
       ]
     },
 
-    /* ---- 브랜치 1 랜덤 스토리 ---- */
+    /* 브랜치 1 랜덤 예시 */
     "1-R1": {
       id: "1-R1",
       branch: 1,
@@ -799,7 +910,7 @@ Even in this sinful city, God is still watching from heaven.`,
           text: "기도하며 회개한다 (Pray and repent)",
           action: () => {
             state.faith += 3;
-            setStoryLog("회개의 기도를 드렸습니다. 신앙심 +3");
+            addLog("회개의 기도를 드렸습니다. 신앙심 +3");
             renderHeader();
             saveGame(true);
             gotoRandomStoryInBranch(1);
@@ -807,6 +918,7 @@ Even in this sinful city, God is still watching from heaven.`,
         }
       ]
     },
+
     "1-R2": {
       id: "1-R2",
       branch: 1,
@@ -820,7 +932,7 @@ The atmosphere gets wilder, and they even begin to mock God.`,
           text: "조용히 자리를 떠난다 (Quietly leave)",
           action: () => {
             state.faith += 2;
-            setStoryLog("유혹을 뿌리치고 자리를 떠났습니다. 신앙심 +2");
+            addLog("유혹을 뿌리치고 자리를 떠났습니다. 신앙심 +2");
             renderHeader();
             saveGame(true);
             gotoRandomStoryInBranch(1);
@@ -829,15 +941,15 @@ The atmosphere gets wilder, and they even begin to mock God.`,
         {
           text: "같이 술을 마신다 (Drink with them)",
           action: () => {
-            setStoryLog("영적으로 지쳐 갑니다... HP 2 감소.");
-            applyDamage(2);
+            addLog("영적으로 지쳐 갑니다... HP 2 감소.");
+            applyDamage(2, "술자리에서 지침");
             gotoRandomStoryInBranch(1);
           }
         }
       ]
     },
 
-    /* ---- 브랜치 2 랜덤 스토리 ---- */
+    /* 브랜치 2 랜덤 예시 */
     "2-R1": {
       id: "2-R1",
       branch: 2,
@@ -851,7 +963,7 @@ but quietly in your heart, you recall Psalm 23.`,
           text: "“여호와는 나의 목자시니…”를 묵상한다",
           action: () => {
             state.faith += 4;
-            setStoryLog("말씀을 묵상하며 위로를 받았습니다. 신앙심 +4");
+            addLog("말씀을 묵상하며 위로를 받았습니다. 신앙심 +4");
             renderHeader();
             saveGame(true);
             gotoRandomStoryInBranch(2);
@@ -859,6 +971,7 @@ but quietly in your heart, you recall Psalm 23.`,
         }
       ]
     },
+
     "2-R2": {
       id: "2-R2",
       branch: 2,
@@ -871,30 +984,43 @@ You heard that there is a community there that worships God.`,
         {
           text: "마을로 들어가 본다",
           action: () => {
-            setStoryLog("새로운 믿음의 공동체를 향해 걸음을 옮깁니다.");
+            addLog("새로운 믿음의 공동체를 향해 걸음을 옮깁니다.");
             gotoRandomStoryInBranch(2);
           }
         }
       ]
     },
 
-    /* ---- 예시: 브랜치 2에서 RPG 전투가 붙는 장면 (JSON으로도 뽑을 수 있는 구조) ---- */
-    "2-B1": {
-      id: "2-B1",
+    /* 예시: RPG 전투 테스트용 스토리 (나중에 JSON에서 호출 가능) */
+    "2-BATTLE-TEST": {
+      id: "2-BATTLE-TEST",
       branch: 2,
       random: true,
-      type: "rpg-battle",           // 이 플래그로 전투 호출
-      enemyName: "광야 도둑",
-      ko: `갑자기 광야의 바위 뒤에서 한 도둑이 나타나
-{player}님의 가방을 노리며 달려듭니다!`,
-      en: `Suddenly, a bandit jumps out from behind a rock
-and rushes toward {player} to steal your bag.`
+      ko: `광야 한가운데, 이상하게도 어두운 그림자가 다가옵니다.
+{name}님 앞에 알 수 없는 적이 서 있습니다.`,
+      en: `In the middle of the wilderness, a strange shadow appears.
+An unknown enemy stands before {name}.`,
+      choices: [
+        {
+          text: "⚔ 싸운다 (Start RPG Battle)",
+          action: () => {
+            // JSON에서는 여기처럼 startRpgBattleWithName('Enemy Name') 만 호출해 주면 됨
+            startRpgBattleWithName("어두운 그림자");
+          }
+        },
+        {
+          text: "🏃 도망간다",
+          action: () => {
+            attemptEncounterEscape();
+          }
+        }
+      ]
     }
   };
 
-  /* ---------------- 스토리 엔진 ---------------- */
+  /* ---------------- 스토리 렌더링 ---------------- */
 
-  function replaceName(text){
+  function replaceName(text) {
     if (!text) return "";
     return text
       .replace(/\{name\}/g, playerName)
@@ -902,25 +1028,26 @@ and rushes toward {player} to steal your bag.`
       .replace(/\{surname\}/g, playerName);
   }
 
-  function renderScene(scene){
-    const koEl = document.getElementById("storyKo");
-    const enEl = document.getElementById("storyEn");
-    const choiceBox = document.getElementById("choiceContainer");
-    const logEl = document.getElementById("storyLog");
+  function showStoryView() {
+    document.getElementById("storyView").style.display = "block";
+    document.getElementById("battleView").style.display = "none";
+  }
 
-    logEl.textContent = "";
-    koEl.textContent = replaceName(scene.ko || "");
-    enEl.textContent = replaceName(scene.en || "");
+  function showBattleView() {
+    document.getElementById("storyView").style.display = "none";
+    document.getElementById("battleView").style.display = "block";
+  }
+
+  function renderScene(scene) {
+    showStoryView();
+    document.getElementById("storyKo").textContent = replaceName(scene.ko);
+    document.getElementById("storyEn").textContent = replaceName(scene.en);
+
+    const choiceBox = document.getElementById("choiceContainer");
     choiceBox.innerHTML = "";
 
-    // RPG 전투 타입이면, 바로 전투 시작
-    if (scene.type === "rpg-battle") {
-      startRpgBattle(scene.enemyName || "Enemy");
-      return;
-    }
-
     if (scene.choices && scene.choices.length) {
-      scene.choices.forEach(choice => {
+      scene.choices.forEach((choice) => {
         const btn = document.createElement("button");
         btn.className = "choice-btn";
         btn.textContent = choice.text;
@@ -928,7 +1055,6 @@ and rushes toward {player} to steal your bag.`
         choiceBox.appendChild(btn);
       });
     } else {
-      // 선택지가 없으면, 해당 브랜치 랜덤 스토리로 이동
       const btn = document.createElement("button");
       btn.className = "choice-btn";
       btn.textContent = "계속 진행";
@@ -937,10 +1063,10 @@ and rushes toward {player} to steal your bag.`
     }
   }
 
-  function gotoScene(id){
+  function gotoScene(id) {
     const scene = scenes[id];
     if (!scene) {
-      setStoryLog("아직 준비되지 않은 스토리입니다.");
+      addLog("아직 준비되지 않은 스토리입니다. (" + id + ")");
       return;
     }
     state.storyKey = id;
@@ -949,10 +1075,12 @@ and rushes toward {player} to steal your bag.`
     saveGame(true);
   }
 
-  function gotoRandomStoryInBranch(branch){
-    const pool = Object.values(scenes).filter(s => s.branch === branch && s.random);
+  function gotoRandomStoryInBranch(branch) {
+    const pool = Object.values(scenes).filter(
+      (s) => s.branch === branch && s.random
+    );
     if (!pool.length) {
-      const fallback = (branch === 1) ? "1-1" : "2-1";
+      const fallback = branch === 1 ? "1-1" : "2-1";
       gotoScene(fallback);
       return;
     }
@@ -961,543 +1089,526 @@ and rushes toward {player} to steal your bag.`
     gotoScene(chosen.id);
   }
 
-  function setStoryLog(msg){
-    document.getElementById("storyLog").textContent = msg || "";
+  /* ---------------- HP / LIFE / GAME OVER ---------------- */
+
+  function updateHpBars() {
+    const playerHpBar = document.getElementById("playerHpBar");
+    const playerHpText = document.getElementById("playerBattleHpText");
+    const playerStats = document.getElementById("playerBattleStats");
+
+    if (playerHpBar && state.maxHp > 0) {
+      const ratio = Math.max(0, Math.min(1, state.hp / state.maxHp));
+      playerHpBar.style.width = (ratio * 100) + "%";
+    }
+    if (playerHpText) {
+      playerHpText.textContent = `HP ${state.hp} / ${state.maxHp}`;
+    }
+    if (playerStats) {
+      playerStats.textContent =
+        `STR ${state.str} | DEX ${state.dex} | DEF ${state.def} | LIFE ${state.life}`;
+    }
   }
 
-  /* ---------------- HP / LIFE / GAME OVER (스토리용) ---------------- */
+  function applyDamage(amount, reason) {
+    amount = Math.max(0, Math.floor(amount));
+    if (amount <= 0) return;
 
-  function applyDamage(dmg){
-    state.hp -= dmg;
+    state.hp -= amount;
     if (state.hp < 0) state.hp = 0;
+    addLog(`HP ${amount} 감소 (${reason || "피해"}) – 현재 HP ${state.hp}/${state.maxHp}`);
+
+    updateHpBars();
+    renderHeader();
+    saveGame(true);
 
     if (state.hp <= 0) {
-      state.life -= 1;
+      handleHpZero();
+    }
+  }
 
-      if (state.life <= 0) {
-        handleGameOver();
-        return;
-      }
+  function healHp(amount, reason) {
+    amount = Math.max(0, Math.floor(amount));
+    if (amount <= 0) return;
+    const old = state.hp;
+    state.hp += amount;
+    if (state.hp > state.maxHp) state.hp = state.maxHp;
+    const real = state.hp - old;
+    addLog(`HP ${real} 회복 (${reason || "회복"}) – 현재 HP ${state.hp}/${state.maxHp}`);
+    updateHpBars();
+    renderHeader();
+    saveGame(true);
+  }
 
-      state.hp = state.maxHp;
-      setStoryLog("HP가 0이 되어 한 목숨을 잃었지만, 다시 일어났습니다! 다른 사건으로 이동합니다.");
-      renderHeader();
-      saveGame(true);
-      gotoRandomStoryInBranch(state.branch || 1);
+  function handleHpZero() {
+    state.life -= 1;
+    renderHeader();
+
+    if (state.life <= 0) {
+      handleGameOver();
       return;
     }
 
+    addLog("HP가 0이 되어 한 목숨을 잃었지만, 다시 일어났습니다. (LIFE -1)");
+    state.hp = state.maxHp;
+    updateHpBars();
     renderHeader();
     saveGame(true);
+
+    // 전투 중이었으면 전투 종료 후 랜덤 스토리로
+    if (battleState.active) {
+      battleState.active = false;
+      showStoryView();
+      gotoRandomStoryInBranch(state.branch || 1);
+    }
   }
 
-  function handleGameOver(){
-    const keptFaith = state.faith;
-    setStoryLog("Game Over... 능력치는 초기화되고, 신앙심만 유지됩니다.");
+  function handleGameOver() {
+    addLog("GAME OVER – 능력치는 초기화되고, 신앙심만 유지됩니다.");
+    const overlay = document.getElementById("gameOverOverlay");
+    if (overlay) overlay.style.display = "flex";
 
-    state = {
-      ...defaultState,
-      faith: keptFaith
+    setTimeout(() => {
+      const keptFaith = state.faith || 0;
+      state = {
+        ...defaultState,
+        faith: keptFaith
+      };
+      localStorage.setItem("pilgrimSaveData", JSON.stringify(state));
+      renderHeader();
+      updateHpBars();
+      showStoryView();
+      gotoScene("0-0");
+      const ov = document.getElementById("gameOverOverlay");
+      if (ov) ov.style.display = "none";
+      saveGame(true);
+    }, 3000);
+  }
+
+  /* ---------------- RPG 전투 시스템 ---------------- */
+
+  const battleState = {
+    active: false,
+    turn: 1,
+    enemy: null,
+    prayerUsed: false,
+    prayerBuff: null,
+    prayerBuffTurns: 0
+  };
+
+  const battleLogLines = [];
+
+  function addBattleLog(msg) {
+    battleLogLines.push(msg);
+    if (battleLogLines.length > 50) battleLogLines.shift();
+    const box = document.getElementById("battleLog");
+    if (!box) return;
+    box.innerHTML = battleLogLines.map(line => `<div>${line}</div>`).join("");
+    box.scrollTop = box.scrollHeight;
+  }
+
+  function startRpgBattleWithName(enemyName) {
+    // 플레이어 능력치 기반으로 적 스탯 생성
+    const baseStr = Math.max(1, state.str);
+    const baseDex = Math.max(1, state.dex);
+    const baseDef = Math.max(0, state.def);
+    const baseHp  = Math.max(5, state.maxHp);
+
+    const enemyMaxHp = Math.max(5, Math.floor(baseHp * (0.7 + Math.random()*0.6)));
+    const enemyAtk   = Math.max(1, Math.floor(baseStr * (0.7 + Math.random()*0.8)));
+    const enemyDex   = Math.max(1, Math.floor(baseDex * (0.7 + Math.random()*0.8)));
+    const enemyDef   = Math.max(0, Math.floor(baseDef * (0.5 + Math.random()*0.7)));
+
+    battleState.active = true;
+    battleState.turn = 1;
+    battleState.enemy = {
+      name: enemyName || "알 수 없는 적",
+      hp: enemyMaxHp,
+      maxHp: enemyMaxHp,
+      atk: enemyAtk,
+      dex: enemyDex,
+      def: enemyDef
     };
+    battleState.prayerUsed = false;
+    battleState.prayerBuff = null;
+    battleState.prayerBuffTurns = 0;
+    battleLogLines.length = 0;
 
-    renderHeader();
-    saveGame(true);
-    gotoScene("0-0");
+    document.getElementById("battleTitle").textContent = "전투 – " + enemyName;
+    document.getElementById("battleTurnText").textContent = "Turn 1";
+    document.getElementById("enemyBattleName").textContent = enemyName;
+    document.getElementById("enemyBattleStats").textContent =
+      `ATK ${enemyAtk} | DEX ${enemyDex} | DEF ${enemyDef}`;
+
+    const prayBtn = document.getElementById("prayBtn");
+    if (prayBtn) prayBtn.disabled = false;
+
+    addBattleLog("전투가 시작되었습니다. (" + enemyName + ")");
+    addLog("RPG 전투 시작 – " + enemyName);
+
+    updateBattleHud();
+    showBattleView();
   }
 
-  /* ---------------- 기존 전투 시스템: 가위바위보 (운빨) ---------------- */
+  function updateBattleHud() {
+    const enemy = battleState.enemy;
+    updateHpBars(); // 플레이어 쪽
 
-  let rpsState = {
+    if (!enemy) return;
+    const enemyHpBar = document.getElementById("enemyHpBar");
+    const enemyHpText = document.getElementById("enemyBattleHpText");
+
+    if (enemyHpBar && enemy.maxHp > 0) {
+      const ratio = Math.max(0, Math.min(1, enemy.hp / enemy.maxHp));
+      enemyHpBar.style.width = (ratio * 100) + "%";
+    }
+    if (enemyHpText) {
+      enemyHpText.textContent = `HP ${enemy.hp} / ${enemy.maxHp}`;
+    }
+  }
+
+  function endBattleAndReturn(message) {
+    if (message) addBattleLog(message);
+    battleState.active = false;
+    showStoryView();
+    gotoRandomStoryInBranch(state.branch || 1);
+  }
+
+  function rpgAttack() {
+    if (!battleState.active || !battleState.enemy) return;
+
+    const enemy = battleState.enemy;
+
+    // --- 플레이어 공격 ---
+    let dmgMin = Math.max(1, Math.floor(state.str * 0.7));
+    let dmgMax = Math.max(dmgMin + 1, Math.floor(state.str * 1.3 + 2));
+    let damage = dmgMin + Math.floor(Math.random() * (dmgMax - dmgMin + 1));
+
+    // 기도 버프: 공격력 증가
+    if (battleState.prayerBuff && battleState.prayerBuff.type === "atkUp") {
+      const bonusRate = battleState.prayerBuff.rate;
+      damage = Math.floor(damage * (1 + bonusRate));
+    }
+
+    // 적 방어 반영
+    const reducedByDef = Math.floor(enemy.def * 0.4);
+    damage = Math.max(1, damage - reducedByDef);
+
+    enemy.hp -= damage;
+    if (enemy.hp < 0) enemy.hp = 0;
+    addBattleLog(`당신의 공격! ${enemy.name}에게 ${damage} 피해를 입혔습니다.`);
+    addLog(`전투: 적에게 ${damage} 피해를 입혔습니다.`);
+
+    updateBattleHud();
+
+    // 적 사망 체크
+    if (enemy.hp <= 0) {
+      addBattleLog(`${enemy.name}을(를) 쓰러뜨렸습니다!`);
+      addLog(`${enemy.name}과의 전투에서 승리했습니다! 신앙심 +7, 힘 +1`);
+      state.faith += 7;
+      state.str += 1;
+      renderHeader();
+      saveGame(true);
+      const prayBtn = document.getElementById("prayBtn");
+      if (prayBtn) prayBtn.disabled = true;
+      return endBattleAndReturn("전투에서 승리했습니다.");
+    }
+
+    // --- 적 턴 (플레이어 방어/회피) ---
+    enemyTurn();
+  }
+
+  function enemyTurn() {
+    if (!battleState.active || !battleState.enemy) return;
+    const enemy = battleState.enemy;
+
+    // 기본 회피 확률
+    let dodgeChance = 0.05 + state.dex * 0.01; // 기본 5% + DEX*1%
+    // 기도 버프: 회피 증가
+    if (battleState.prayerBuff && battleState.prayerBuff.type === "dodgeUp") {
+      dodgeChance += battleState.prayerBuff.bonus;
+    }
+    if (dodgeChance > 0.9) dodgeChance = 0.9;
+
+    if (Math.random() < dodgeChance) {
+      addBattleLog(`당신은 민첩하게 움직여 ${enemy.name}의 공격을 회피했습니다!`);
+      addLog("전투 중 공격을 회피했습니다.");
+      nextBattleTurn();
+      return;
+    }
+
+    // 적 공격 계산
+    let dmgMin = Math.max(1, Math.floor(enemy.atk * 0.7));
+    let dmgMax = Math.max(dmgMin + 1, Math.floor(enemy.atk * 1.3 + 2));
+    let damage = dmgMin + Math.floor(Math.random() * (dmgMax - dmgMin + 1));
+
+    // 기도 버프: 받는 피해 감소
+    if (battleState.prayerBuff && battleState.prayerBuff.type === "dmgDown") {
+      damage = Math.floor(damage * (1 - battleState.prayerBuff.rate));
+    }
+
+    // 플레이어 DEF 반영
+    const reducedByDef = Math.floor(state.def * 0.5);
+    damage = Math.max(1, damage - reducedByDef);
+
+    addBattleLog(`${enemy.name}의 공격! 당신은 ${damage} 피해를 받았습니다.`);
+    applyDamage(damage, `${enemy.name}의 공격`);
+    updateBattleHud();
+
+    if (state.life <= 0) {
+      // GameOver가 이미 처리됨
+      const prayBtn = document.getElementById("prayBtn");
+      if (prayBtn) prayBtn.disabled = true;
+      return;
+    }
+
+    if (!battleState.active) {
+      // HP 0 → 목숨 1 줄고 랜덤 스토리로 넘어갔을 수 있음
+      return;
+    }
+
+    nextBattleTurn();
+  }
+
+  function nextBattleTurn() {
+    battleState.turn += 1;
+    document.getElementById("battleTurnText").textContent = "Turn " + battleState.turn;
+
+    // 기도 버프 턴 감소
+    if (battleState.prayerBuff && battleState.prayerBuffTurns > 0) {
+      battleState.prayerBuffTurns -= 1;
+      if (battleState.prayerBuffTurns <= 0) {
+        addBattleLog("기도의 특별한 효과가 사라졌습니다.");
+        battleState.prayerBuff = null;
+      }
+    }
+  }
+
+  function usePrayerSkill() {
+    if (!battleState.active) return;
+    if (battleState.prayerUsed) return;
+
+    battleState.prayerUsed = true;
+    const prayBtn = document.getElementById("prayBtn");
+    if (prayBtn) prayBtn.disabled = true;
+
+    // 4가지 중 랜덤: 공격력, 받는 피해 감소, 회피 확률, 즉시 HP 회복
+    const roll = Math.floor(Math.random() * 4);
+
+    if (roll === 0) {
+      // 공격력 업
+      const rate = 0.3 + Math.random() * 0.4; // 30~70%
+      battleState.prayerBuff = { type: "atkUp", rate };
+      battleState.prayerBuffTurns = 2;
+      addBattleLog(`기도의 힘! 다음 ${battleState.prayerBuffTurns}턴 동안 공격력이 ${Math.round(rate*100)}% 증가합니다.`);
+      addLog("기도 스킬 사용 – 공격력 증가 버프 발동");
+    } else if (roll === 1) {
+      // 받는 피해 감소
+      const rate = 0.3 + Math.random() * 0.4; // 30~70%
+      battleState.prayerBuff = { type: "dmgDown", rate };
+      battleState.prayerBuffTurns = 2;
+      addBattleLog(`기도의 보호! 다음 ${battleState.prayerBuffTurns}턴 동안 받는 피해가 ${Math.round(rate*100)}% 감소합니다.`);
+      addLog("기도 스킬 사용 – 피해 감소 버프 발동");
+    } else if (roll === 2) {
+      // 회피 확률 증가
+      const bonus = 0.2 + Math.random() * 0.3; // +20~50%
+      battleState.prayerBuff = { type: "dodgeUp", bonus };
+      battleState.prayerBuffTurns = 2;
+      addBattleLog(`기도의 민첩! 다음 ${battleState.prayerBuffTurns}턴 동안 회피 확률이 크게 증가합니다.`);
+      addLog("기도 스킬 사용 – 회피 증가 버프 발동");
+    } else {
+      // 즉시 HP 회복
+      const healAmount = Math.max(1, Math.floor(state.maxHp * (0.25 + Math.random()*0.35))); // 25~60%
+      healHp(healAmount, "기도로 회복");
+      addBattleLog(`기도 응답! 즉시 HP가 ${healAmount} 회복되었습니다.`);
+      addLog("기도 스킬 사용 – 즉시 HP 회복");
+      // 힐은 버프 없음
+    }
+  }
+
+  function rpgRun() {
+    if (!battleState.active || !battleState.enemy) return;
+
+    // 회피 스탯 기반 도망 확률
+    let runChance = 0.3 + state.dex * 0.01; // 기본 30% + DEX*1
+    if (runChance > 0.8) runChance = 0.8;
+
+    if (Math.random() < runChance) {
+      addBattleLog("당신은 간신히 전투에서 도망치는 데 성공했습니다!");
+      addLog("RPG 전투에서 도망 성공");
+      battleState.active = false;
+      showStoryView();
+      gotoRandomStoryInBranch(state.branch || 1);
+    } else {
+      addBattleLog("도망치려 했지만 실패했습니다! 적이 반격합니다.");
+      addLog("RPG 전투에서 도망 실패 – 적의 공격");
+      enemyTurn();
+    }
+  }
+
+  /* ---------------- 가위바위보 전투 (운빨 전용) ---------------- */
+
+  const rpsState = {
     active: false,
     wins: 0,
     losses: 0
   };
 
-  function startRpsBattle(){
-    rpsState = { active: true, wins: 0, losses: 0 };
+  function startRpsBattle() {
+    rpsState.active = true;
+    rpsState.wins = 0;
+    rpsState.losses = 0;
 
-    const battleScene = {
-      ko: `전투 모드(가위바위보)가 시작되었습니다!
-가위, 바위, 보 중 하나를 선택하세요.
-3번 이기면 승리, 3번 지면 패배입니다.`,
-      en: `Battle mode (rock-paper-scissors) has begun!
-Choose rock, paper, or scissors.
-Win 3 times to win the battle. Lose 3 times and you are defeated.`,
+    const scene = {
+      ko: `가위바위보 전투가 시작되었습니다!
+3번 이기면 승리, 3번 지면 패배입니다.
+(완전 운빨 전투입니다 😊)`,
+      en: `Rock–Paper–Scissors Battle has begun!
+Win 3 rounds to win the battle, lose 3 rounds and you are defeated.
+(This battle is purely based on luck.)`,
       choices: [
-        { text: "✌ 가위 (Scissors)", action: () => rpsRound() },
-        { text: "✊ 바위 (Rock)",     action: () => rpsRound() },
-        { text: "✋ 보 (Paper)",      action: () => rpsRound() },
+        { text: "✌ 가위 (Scissors)", action: () => rpsRound("가위") },
+        { text: "✊ 바위 (Rock)",     action: () => rpsRound("바위") },
+        { text: "✋ 보 (Paper)",      action: () => rpsRound("보") },
         { text: "🏃 도망 (Run away)", action: () => rpsRun() }
       ]
     };
 
-    renderScene(battleScene);
-    setStoryLog("가위바위보에서 3번 이기면 승리합니다. (완전 운빨)");
+    renderScene({ ...scene, choices: scene.choices });
+    addLog("가위바위보 전투 시작");
   }
 
-  function rpsRound(){
+  function rpsRound(playerChoice) {
     if (!rpsState.active) return;
-    const winProb = getAttackWinChance();
-    if (chance(winProb)) {
+
+    // 결과는 완전 랜덤: 0=승,1=패,2=무승부
+    const roll = Math.floor(Math.random()*3);
+    let resultText = "";
+    if (roll === 0) {
       rpsState.wins++;
-      setStoryLog(`전투에서 승리했습니다! (현재 승리: ${rpsState.wins}/3)`);
-
-      if (rpsState.wins >= 3) {
-        rpsWin();
-      }
-    } else {
+      resultText = `당신이 (${playerChoice})를 냈고... 운명의 결과는 '승리'입니다! (승리 ${rpsState.wins}/3, 패배 ${rpsState.losses}/3)`;
+    } else if (roll === 1) {
       rpsState.losses++;
-      setStoryLog(`전투에서 패배했습니다... (현재 패배: ${rpsState.losses}/3)`);
+      resultText = `당신이 (${playerChoice})를 냈고... 운명의 결과는 '패배'입니다... (승리 ${rpsState.wins}/3, 패배 ${rpsState.losses}/3)`;
+    } else {
+      resultText = `당신이 (${playerChoice})를 냈고... '무승부'입니다. (승리 ${rpsState.wins}/3, 패배 ${rpsState.losses}/3)`;
+    }
 
-      if (rpsState.losses >= 3) {
-        rpsLose();
-      }
+    addLog(resultText);
+
+    // 스토리 텍스트 업데이트
+    document.getElementById("storyKo").textContent =
+      "가위바위보 전투 중...\n" + resultText;
+    document.getElementById("storyEn").textContent =
+      "Rock-Paper-Scissors Battle...\n" + resultText;
+
+    if (rpsState.wins >= 3) {
+      return rpsWin();
+    }
+    if (rpsState.losses >= 3) {
+      return rpsLose();
     }
   }
 
-  function rpsRun(){
-    if (!rpsState.active) return;
-    const runProb = getRunChanceInBattleRps();
-    if (chance(runProb)) {
-      rpsState.active = false;
-      setStoryLog("전투에서 도망에 성공했습니다!");
-      saveGame(true);
-      gotoRandomStoryInBranch(state.branch || 1);
-    } else {
-      rpsState.losses++;
-      setStoryLog(`도망에 실패했습니다! (패배 카운트 +1 → ${rpsState.losses}/3)`);
-      if (rpsState.losses >= 3) {
-        rpsLose();
-      }
-    }
-  }
-
-  function rpsWin(){
+  function rpsWin() {
     rpsState.active = false;
-    state.faith += 7;
-    state.str += 1;
-    setStoryLog("전투에서 완전히 승리했습니다! 신앙심 +7, 힘 +1");
+    addLog("가위바위보 전투에서 승리했습니다! 신앙심 +5");
+    state.faith += 5;
     renderHeader();
     saveGame(true);
     gotoRandomStoryInBranch(state.branch || 1);
   }
 
-  function rpsLose(){
+  function rpsLose() {
     rpsState.active = false;
-    const defProb = getDefenseChance();
-    if (chance(defProb)) {
-      setStoryLog("전투에서는 졌지만, 방어에 성공하여 HP가 감소하지 않았습니다!");
-      renderHeader();
-      saveGame(true);
-      gotoRandomStoryInBranch(state.branch || 1);
-      return;
-    }
-
-    setStoryLog("전투에서 패배하여 HP가 6 감소했습니다.");
-    applyDamage(6);
+    const dmg = 6;
+    addLog(`가위바위보 전투에서 패배했습니다... HP ${dmg} 감소.`);
+    applyDamage(dmg, "가위바위보 패배");
     gotoRandomStoryInBranch(state.branch || 1);
   }
 
-  /* 1-1에서 '도망간다' */
-  function attemptEncounterEscape(){
-    const runProb = getRunChanceEncounter();
-    if (chance(runProb)) {
-      setStoryLog("도망에 성공했습니다! 다른 사건으로 이동합니다.");
+  function rpsRun() {
+    if (!rpsState.active) return;
+    rpsState.active = false;
+    addLog("가위바위보 전투에서 도망쳤습니다.");
+    gotoRandomStoryInBranch(state.branch || 1);
+  }
+
+  /* ---------------- 1-1에서의 '도망간다' ---------------- */
+
+  function attemptEncounterEscape() {
+    // 회피 DEX 기반
+    let runProb = 0.5 + state.dex * 0.01; // 기본 50% + DEX*1
+    if (runProb > 0.9) runProb = 0.9;
+
+    if (Math.random() < runProb) {
+      addLog("도망에 성공했습니다! 다른 사건으로 이동합니다.");
       saveGame(true);
       gotoRandomStoryInBranch(state.branch || 1);
     } else {
-      setStoryLog("도망에 실패했습니다... HP가 1 감소합니다.");
-      applyDamage(1);
+      addLog("도망에 실패했습니다... HP가 1 감소합니다.");
+      applyDamage(1, "도망 실패");
       gotoScene("1-1");
     }
   }
 
-  /* ---------------- 새로운 RPG 전투 시스템 ---------------- */
-
-  const rpgBattle = {
-    active: false,
-    enemyName: "",
-    enemyHp: 0,
-    enemyMaxHp: 0,
-    enemyStr: 0,
-    enemyDex: 0,
-    enemyDef: 0,
-    turn: 0,
-    prayerUsed: false,
-    buffType: null,   // "attack" / "damageTaken" / "dodge" / "heal"
-    buffTurns: 0
-  };
-
-  function resetRpgBattle(){
-    rpgBattle.active = false;
-    rpgBattle.enemyName = "";
-    rpgBattle.enemyHp = 0;
-    rpgBattle.enemyMaxHp = 0;
-    rpgBattle.enemyStr = 0;
-    rpgBattle.enemyDex = 0;
-    rpgBattle.enemyDef = 0;
-    rpgBattle.turn = 0;
-    rpgBattle.prayerUsed = false;
-    rpgBattle.buffType = null;
-    rpgBattle.buffTurns = 0;
-  }
-
-  function startRpgBattle(enemyName){
-    resetRpgBattle();
-    rpgBattle.active = true;
-    rpgBattle.enemyName = enemyName || "Enemy";
-
-    // 플레이어 스탯 기반 적 자동 생성
-    const hpFactor = 0.6 + Math.random() * 0.5;    // 0.6~1.1
-    const strFactor = 0.7 + Math.random() * 0.6;   // 0.7~1.3
-    const dexFactor = 0.7 + Math.random() * 0.6;
-    const defFactor = 0.7 + Math.random() * 0.6;
-
-    rpgBattle.enemyMaxHp = Math.max(5, Math.round(state.maxHp * hpFactor));
-    rpgBattle.enemyHp = rpgBattle.enemyMaxHp;
-    rpgBattle.enemyStr = Math.max(1, Math.round(state.str * strFactor));
-    rpgBattle.enemyDex = Math.max(1, Math.round(state.dex * dexFactor));
-    rpgBattle.enemyDef = Math.max(0, Math.round(state.def * defFactor));
-
-    rpgBattle.turn = 1;
-
-    renderRpgBattleUI("전투가 시작되었습니다! 행동을 선택하세요.");
-  }
-
-  function renderRpgBattleUI(message){
-    if (!rpgBattle.active) return;
-
-    const koEl = document.getElementById("storyKo");
-    const enEl = document.getElementById("storyEn");
-    const choiceBox = document.getElementById("choiceContainer");
-
-    const pHpText = `플레이어 HP: ${state.hp}/${state.maxHp}  |  STR:${state.str} DEX:${state.dex} DEF:${state.def}  | LIFE:${state.life}`;
-    const eHpText = `${rpgBattle.enemyName} HP: ${rpgBattle.enemyHp}/${rpgBattle.enemyMaxHp}  |  STR:${rpgBattle.enemyStr} DEX:${rpgBattle.enemyDex} DEF:${rpgBattle.enemyDef}`;
-
-    koEl.textContent =
-`[턴 ${rpgBattle.turn}] 전투 중입니다.
-
-${pHpText}
-${eHpText}`;
-    enEl.textContent =
-`[Turn ${rpgBattle.turn}] Battle is in progress.
-
-${pHpText}
-${eHpText}`;
-
-    choiceBox.innerHTML = "";
-
-    // 공격
-    const atkBtn = document.createElement("button");
-    atkBtn.className = "choice-btn";
-    atkBtn.textContent = "⚔ 공격 (Attack)";
-    atkBtn.onclick = () => rpgPlayerAttack();
-    choiceBox.appendChild(atkBtn);
-
-    // 방어
-    const defBtn = document.createElement("button");
-    defBtn.className = "choice-btn";
-    defBtn.textContent = "🛡 방어 (Defend)";
-    defBtn.onclick = () => rpgPlayerDefend();
-    choiceBox.appendChild(defBtn);
-
-    // 회피
-    const dodgeBtn = document.createElement("button");
-    dodgeBtn.className = "choice-btn";
-    dodgeBtn.textContent = "💨 회피 (Dodge)";
-    dodgeBtn.onclick = () => rpgPlayerDodge();
-    choiceBox.appendChild(dodgeBtn);
-
-    // 기도 (1회만 사용 가능)
-    const prayBtn = document.createElement("button");
-    prayBtn.className = "choice-btn";
-    prayBtn.textContent = "🙏 기도 스킬 (Pray)";
-    prayBtn.onclick = () => rpgPlayerPray();
-    if (rpgBattle.prayerUsed) {
-      prayBtn.disabled = true;
-      prayBtn.textContent = "🙏 기도 스킬 (이미 사용)";
-    }
-    choiceBox.appendChild(prayBtn);
-
-    // 도망
-    const runBtn = document.createElement("button");
-    runBtn.className = "choice-btn";
-    runBtn.textContent = "🏃 도망 (Run)";
-    runBtn.onclick = () => rpgPlayerRun();
-    choiceBox.appendChild(runBtn);
-
-    setStoryLog(message || "");
-  }
-
-  function calcPlayerDamage(){
-    let base = 2 + state.str * 0.5;
-    let rand = (Math.random() * 2) - 1; // -1 ~ +1
-    let dmg = base + rand - rpgBattle.enemyDef * 0.2;
-
-    if (rpgBattle.buffType === "attack" && rpgBattle.buffTurns > 0) {
-      dmg *= 1.5;
-    }
-
-    return Math.max(1, Math.round(dmg));
-  }
-
-  function calcEnemyDamage(){
-    let base = 2 + rpgBattle.enemyStr * 0.5;
-    let rand = (Math.random() * 2) - 1;
-    let dmg = base + rand - state.def * 0.2;
-
-    if (rpgBattle.buffType === "damageTaken" && rpgBattle.buffTurns > 0) {
-      dmg *= 0.6;  // 피해 감소
-    }
-
-    return Math.max(1, Math.round(dmg));
-  }
-
-  /* --- 플레이어 행동 --- */
-
-  function rpgPlayerAttack(){
-    if (!rpgBattle.active) return;
-    const dmg = calcPlayerDamage();
-    rpgBattle.enemyHp -= dmg;
-    if (rpgBattle.enemyHp < 0) rpgBattle.enemyHp = 0;
-
-    let msg = `당신이 ${rpgBattle.enemyName}에게 ${dmg}의 피해를 입혔습니다!`;
-
-    if (rpgBattle.enemyHp <= 0) {
-      rpgBattleWin(msg + " 적을 쓰러뜨렸습니다!");
-      return;
-    }
-
-    // 적의 턴
-    rpgEnemyTurn(msg);
-  }
-
-  function rpgPlayerDefend(){
-    if (!rpgBattle.active) return;
-    // 방어: 이번 적 공격에 대해 추가적인 피해 감소 효과
-    // 간단히: damageTaken 버프 1턴 (이전 버프와는 별개로 1턴 보정)
-    let origBuffType = rpgBattle.buffType;
-    let origBuffTurns = rpgBattle.buffTurns;
-
-    // 임시로 damageTaken 강화
-    rpgBattle.buffType = (origBuffType === "damageTaken") ? "damageTaken" : "defendTemp";
-    // enemyDamage 계산할 때 defendTemp면 더 줄일 수도 있지만, 단순화를 위해 damageTaken와 같은 효과로 처리 가능
-    // 여기서는 enemyDamage 내부에 추가 로직 대신, 아래에서 특별 취급
-    rpgEnemyTurn("당신이 방패를 들고 방어 태세를 취했습니다.", true);
-
-    // 적 턴이 끝난 뒤, 방어 임시 버프는 제거 (원래 버프로 복원)
-    if (rpgBattle.active) {
-      rpgBattle.buffType = origBuffType;
-      rpgBattle.buffTurns = origBuffTurns;
-    }
-  }
-
-  function rpgPlayerDodge(){
-    if (!rpgBattle.active) return;
-    const dodgeBoost = (rpgBattle.buffType === "dodge" && rpgBattle.buffTurns > 0) ? 1.6 : 1.0;
-    const dodgeChance = Math.min(1.0, getRpgDodgeChance() * dodgeBoost);
-
-    let msg = "당신이 몸을 낮추고 회피를 시도합니다.";
-
-    if (chance(dodgeChance)) {
-      msg += " ➜ 적의 공격을 완전히 피했습니다!";
-      advanceTurn();
-      renderRpgBattleUI(msg);
-      return;
-    }
-
-    // 회피 실패 → 적 턴
-    rpgEnemyTurn(msg + " ➜ 그러나 회피에 실패했습니다.");
-  }
-
-  function rpgPlayerPray(){
-    if (!rpgBattle.active) return;
-    if (rpgBattle.prayerUsed) {
-      setStoryLog("이미 이번 전투에서 기도 스킬을 사용했습니다.");
-      return;
-    }
-    rpgBattle.prayerUsed = true;
-
-    // 버프 종류 랜덤 선택
-    const types = ["attack", "damageTaken", "dodge", "heal"];
-    const pick = types[Math.floor(Math.random() * types.length)];
-    rpgBattle.buffType = pick;
-    rpgBattle.buffTurns = 2;
-
-    let msg = "";
-    if (pick === "attack") {
-      msg = "기도에 응답하셔서, 잠시 동안 공격력이 크게 올라갑니다! (2턴)";
-    } else if (pick === "damageTaken") {
-      msg = "하나님이 보호해 주셔서, 잠시 동안 받는 피해가 줄어듭니다! (2턴)";
-    } else if (pick === "dodge") {
-      msg = "성령께서 인도하셔서, 잠시 동안 회피 확률이 높아집니다! (2턴)";
-    } else if (pick === "heal") {
-      // 즉시 회복
-      const heal = Math.max(3, Math.round(state.maxHp * (0.2 + Math.random() * 0.4))); // 20~60%
-      state.hp += heal;
-      if (state.hp > state.maxHp) state.hp = state.maxHp;
-      msg = `기도하는 순간 마음과 몸에 힘이 회복됩니다! HP가 ${heal}만큼 회복되었습니다.`;
-      renderHeader();
-      // heal형은 한 번에 끝나는 버프로 보고, 턴 지속은 0으로 바로 줄여도 됨
-      rpgBattle.buffTurns = 0;
-      rpgBattle.buffType = null;
-    }
-
-    advanceTurn();
-    renderRpgBattleUI(msg);
-  }
-
-  function rpgPlayerRun(){
-    if (!rpgBattle.active) return;
-    const runChance = getRpgRunChance();
-    if (chance(runChance)) {
-      const msg = "당신은 간신히 적에게서 도망치는 데 성공했습니다.";
-      rpgBattle.active = false;
-      setStoryLog(msg);
-      saveGame(true);
-      gotoRandomStoryInBranch(state.branch || 1);
-    } else {
-      rpgEnemyTurn("도망치려 했지만 실패했습니다!");
-    }
-  }
-
-  /* --- 적의 공격 턴 --- */
-
-  function rpgEnemyTurn(prevMessage, isDefendMode){
-    if (!rpgBattle.active) return;
-
-    // 방어 모드일 때 피해 조금 더 감소
-    let dmg = calcEnemyDamage();
-    if (isDefendMode) {
-      dmg = Math.round(dmg * 0.5); // 방어 중이면 추가 50% 감소
-    }
-
-    // 회피 판정 (버프 포함)
-    let dodgeChance = getRpgDodgeChance();
-    if (rpgBattle.buffType === "dodge" && rpgBattle.buffTurns > 0) {
-      dodgeChance = Math.min(1.0, dodgeChance * 1.6);
-    }
-
-    let msg = prevMessage || "";
-    if (!msg) msg = "적이 공격해옵니다.";
-
-    if (chance(dodgeChance)) {
-      msg += `\n그러나 당신은 재빨리 피했습니다!`;
-      advanceTurn();
-      renderRpgBattleUI(msg);
-      return;
-    }
-
-    msg += `\n${rpgBattle.enemyName}의 공격! 당신은 ${dmg}의 피해를 입습니다.`;
-
-    applyBattleDamage(dmg, msg);
-  }
-
-  function applyBattleDamage(dmg, msg){
-    state.hp -= dmg;
-    if (state.hp < 0) state.hp = 0;
-
-    if (state.hp <= 0) {
-      state.life -= 1;
-
-      if (state.life <= 0) {
-        // 완전 Game Over
-        rpgBattle.active = false;
-        setStoryLog(msg + "\nHP가 0이 되어 쓰러졌습니다...");
-        renderHeader();
-        saveGame(true);
-        handleGameOver();
-        return;
-      }
-
-      // LIFE 남아있으면 부활 후 다른 사건으로 이동
-      state.hp = state.maxHp;
-      rpgBattle.active = false;
-      setStoryLog(msg + "\n한 목숨을 잃었지만, 하나님 은혜로 다시 일어났습니다.");
-      renderHeader();
-      saveGame(true);
-      gotoRandomStoryInBranch(state.branch || 1);
-      return;
-    }
-
-    renderHeader();
-    advanceTurn();
-    renderRpgBattleUI(msg);
-  }
-
-  function rpgBattleWin(msg){
-    rpgBattle.active = false;
-    // 전투 보상: 신앙심 +5, STR +1
-    state.faith += 5;
-    state.str += 1;
-    setStoryLog(msg + " 승리 보상: 신앙심 +5, 힘 +1");
-    renderHeader();
-    saveGame(true);
-    gotoRandomStoryInBranch(state.branch || 1);
-  }
-
-  function advanceTurn(){
-    if (rpgBattle.buffTurns > 0 && rpgBattle.buffType) {
-      rpgBattle.buffTurns--;
-      if (rpgBattle.buffTurns <= 0 && rpgBattle.buffType !== null) {
-        // 버프 종료
-        rpgBattle.buffType = null;
-      }
-    }
-    rpgBattle.turn++;
-  }
-
   /* ---------------- 상단 정보 렌더 ---------------- */
 
-  function renderHeader(){
+  function renderHeader() {
     document.getElementById("playerName").textContent = "Player: " + playerName;
     document.getElementById("statLine").textContent =
-      `능력치 – STR:${state.str} | HP:${state.hp}/${state.maxHp} | DEX:${state.dex} | DEF:${state.def} | LIFE:${state.life} | FAITH:${state.faith}`;
+      `능력치 – STR:${state.str} | HP:${state.hp}/${state.maxHp} | ` +
+      `DEX:${state.dex} | DEF:${state.def} | LIFE:${state.life} | FAITH:${state.faith}`;
+    updateHpBars();
+    if (battleState.enemy) updateBattleHud();
   }
 
   /* ---------------- 상점 ---------------- */
 
   const shopItems = [
     { label:"힘 +1",   stat:"str",  amount:1, cost:10 },
-    { label:"체력 +1", stat:"hp",   amount:1, cost:5  },
-    { label:"회피 +1", stat:"dex",  amount:1, cost:5  },
-    { label:"방어 +1", stat:"def",  amount:1, cost:5  },
+    { label:"체력 +1", stat:"hp",   amount:1, cost:5 },
+    { label:"회피 +1", stat:"dex",  amount:1, cost:5 },
+    { label:"방어 +1", stat:"def",  amount:1, cost:5 },
     { label:"목숨 +1", stat:"life", amount:1, cost:50 }
   ];
 
-  function openShop(){
+  let randomLog = [];
+
+  function openShop() {
     document.getElementById("shopBackdrop").style.display = "flex";
     updateShopFaithText();
     buildShopGrid();
     updateRandomLogUI();
   }
 
-  function closeShop(){
+  function closeShop() {
     document.getElementById("shopBackdrop").style.display = "none";
   }
 
-  function updateShopFaithText(){
+  function updateShopFaithText() {
     document.getElementById("shopFaithText").textContent =
       `현재 신앙심(Faith): ${state.faith}F`;
   }
 
-  function buildShopGrid(){
+  function buildShopGrid() {
     const box = document.getElementById("shopGrid");
     box.innerHTML = "";
     shopItems.forEach(item => {
       const div = document.createElement("div");
       div.className = "shop-item";
+
       div.innerHTML = `
         <div class="shop-item-title">${item.label}</div>
         <div class="shop-item-cost">${item.cost}F</div>
         <button class="shop-buy-btn">구입</button>
       `;
+
       div.querySelector("button").onclick = () => buyItem(item);
       box.appendChild(div);
     });
   }
 
-  function buyItem(item){
+  function buyItem(item) {
     if (state.faith < item.cost) {
       showToast("신앙심이 부족합니다!");
       return;
@@ -1512,6 +1623,7 @@ ${eHpText}`;
       state[item.stat] += item.amount;
     }
 
+    addLog(`상점에서 '${item.label}'을(를) 구입했습니다.`);
     renderHeader();
     updateShopFaithText();
     saveGame(true);
@@ -1560,7 +1672,7 @@ ${eHpText}`;
     { text:"꽝", apply:()=>{}, weight:20 }
   ];
 
-  function rollGacha(){
+  function rollGacha() {
     if (state.faith < gachaCost) {
       showToast("신앙심이 부족합니다! (50F 필요)");
       return;
@@ -1570,8 +1682,8 @@ ${eHpText}`;
 
     let total = gachaTable.reduce((s,x)=>s+x.weight, 0);
     let r = Math.random() * total;
-    let chosen = gachaTable[gachaTable.length-1];
 
+    let chosen = gachaTable[gachaTable.length-1];
     for (const entry of gachaTable) {
       if (r < entry.weight) {
         chosen = entry;
@@ -1586,29 +1698,33 @@ ${eHpText}`;
     updateRandomLogUI();
 
     if (chosen.text.includes("Gift Card")) {
+      addLog("랜덤 뽑기에서 Gift Card에 당첨되었습니다! ("+chosen.text+")");
       showGiftPopup(chosen.text);
-      renderHeader();
       updateShopFaithText();
+      renderHeader();
       saveGame(true);
       return;
     }
 
     chosen.apply();
+    addLog("랜덤 뽑기 결과: " + chosen.text);
     renderHeader();
     updateShopFaithText();
     saveGame(true);
 
     confettiEffect();
-    showToast("랜덤 뽑기 결과: " + chosen.text);
+    showToast("랜덤 뽑기: " + chosen.text);
   }
 
-  function updateRandomLogUI(){
+  function updateRandomLogUI() {
     const box = document.getElementById("randomLogBox");
     if (!randomLog.length) {
       box.innerHTML = "<p style='margin:0;color:#999;'>아직 기록이 없습니다.</p>";
       return;
     }
-    box.innerHTML = randomLog.map(item => `<div>• ${item}</div>`).join("");
+    box.innerHTML = randomLog
+      .map(item=>`<div>• ${item}</div>`)
+      .join("");
   }
 
   function showGiftPopup(itemName){
@@ -1653,7 +1769,9 @@ ${eHpText}`;
     `;
 
     card.querySelector("button:last-of-type").onclick = () => back.remove();
-    card.querySelector("#fakeShotBtn").onclick = () => {
+
+    const fakeBtn = card.querySelector("#fakeShotBtn");
+    fakeBtn.onclick = () => {
       alert("기기에서 스크린샷을 직접 찍어주세요! (예: 휴대폰 캡쳐 버튼)");
     };
 
@@ -1661,37 +1779,12 @@ ${eHpText}`;
     document.body.appendChild(back);
   }
 
-  /* ---------------- 저장 ---------------- */
-
-  async function saveGame(silent=false){
-    if (!playerId) {
-      if (!silent) alert("로그인이 필요합니다. index.html에서 다시 로그인 해주세요.");
-      return;
-    }
-    localStorage.setItem("pilgrimSaveData", JSON.stringify(state));
-
-    try {
-      const r = await fetch(API_URL, {
-        method:"POST",
-        body:JSON.stringify({
-          type:"save",
-          id:playerId,
-          saveData:state
-        })
-      });
-      const t = await r.text();
-      if(!silent){
-        if(t==="saved") showToast("저장 완료!");
-        else showToast("저장 실패: " + t);
-      }
-    } catch(e){
-      if(!silent) alert("저장 중 오류가 발생했습니다.");
-    }
-  }
-
   /* ---------------- 채팅 기능 ---------------- */
 
-  function openChat(){
+  let chatMessages = [];
+  let chatPollTimer = null;
+
+  function openChat() {
     document.getElementById("chatBackdrop").style.display = "flex";
     fetchChat(true);
     setTimeout(() => {
@@ -1700,11 +1793,11 @@ ${eHpText}`;
     }, 100);
   }
 
-  function closeChat(){
+  function closeChat() {
     document.getElementById("chatBackdrop").style.display = "none";
   }
 
-  async function fetchChat(silent = true){
+  async function fetchChat(silent = true) {
     try {
       const res = await fetch(API_URL, {
         method: "POST",
@@ -1725,7 +1818,7 @@ ${eHpText}`;
     }
   }
 
-  function renderChatMini(){
+  function renderChatMini() {
     const box = document.getElementById("chatMini");
     if (!chatMessages.length) {
       box.innerHTML = "<div class='chat-mini-empty'>채팅이 아직 없습니다. 친구들에게 먼저 말을 걸어보세요!</div>";
@@ -1745,8 +1838,9 @@ ${eHpText}`;
     }).join("");
   }
 
-  function renderChatModalMessages(){
+  function renderChatModalMessages() {
     const wrap = document.getElementById("chatMessages");
+    if (!wrap) return;
     if (!chatMessages.length) {
       wrap.innerHTML = `<div class="chat-empty">아직 채팅이 없습니다. 첫 번째 메시지를 남겨보세요!</div>`;
       return;
@@ -1768,7 +1862,7 @@ ${eHpText}`;
     wrap.scrollTop = wrap.scrollHeight;
   }
 
-  async function sendChat(){
+  async function sendChat() {
     const input = document.getElementById("chatInput");
     if (!input) return;
     const msg = (input.value || "").trim();
@@ -1810,7 +1904,7 @@ ${eHpText}`;
     }
   });
 
-  function escapeHtml(str){
+  function escapeHtml(str) {
     return String(str)
       .replace(/&/g,"&amp;")
       .replace(/</g,"&lt;")
@@ -1819,7 +1913,33 @@ ${eHpText}`;
       .replace(/'/g,"&#039;");
   }
 
-  /* ---------------- 토스트 & 폭죽 ---------------- */
+  /* ---------------- 저장 & 유틸 ---------------- */
+
+  async function saveGame(silent=false){
+    if (!playerId) {
+      if (!silent) alert("로그인이 필요합니다. index.html에서 다시 로그인 해주세요.");
+      return;
+    }
+    localStorage.setItem("pilgrimSaveData", JSON.stringify(state));
+
+    try {
+      const r = await fetch(API_URL, {
+        method:"POST",
+        body:JSON.stringify({
+          type:"save",
+          id:playerId,
+          saveData:state
+        })
+      });
+      const t = await r.text();
+      if(!silent){
+        if(t==="saved") showToast("저장 완료!");
+        else showToast("저장 실패: " + t);
+      }
+    } catch(e){
+      if(!silent) alert("저장 중 오류가 발생했습니다.");
+    }
+  }
 
   function showToast(msg){
     const t = document.getElementById("toast");
@@ -1828,7 +1948,7 @@ ${eHpText}`;
     setTimeout(()=>t.classList.remove("show"), 2000);
   }
 
-  function confettiEffect(){
+  function confettiEffect() {
     const duration = 1200;
     const end = Date.now() + duration;
 
@@ -1860,6 +1980,7 @@ ${eHpText}`;
   gotoScene(state.storyKey || "0-0");
   fetchChat(true);
   chatPollTimer = setInterval(fetchChat, 5000);
+
 </script>
 
 </body>
